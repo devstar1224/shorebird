@@ -4,6 +4,17 @@ All notable changes to `code_push_server` are documented here. The format is
 based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 package follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- **Korean web console.** The console at `/console` now ships a Korean UI and
+  opens in Korean by default, with an English / Korean toggle that persists
+  per browser and redraws the current view in place. Strings live in an inline
+  `ko`/`en` dictionary, so the console is still a single file with no build
+  step. Role and status names are translated for display only; the values sent
+  to the API are unchanged.
+
 ## 1.2.0 — 2026-07-29
 
 ### Fixed
