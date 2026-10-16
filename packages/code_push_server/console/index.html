@@ -3,21 +3,24 @@
 <!-- Above are CSS class and element-id names local to this console SPA, not
      prose. Kept inline rather than in the global dictionary so they can't
      mask a real typo elsewhere in the repo. -->
-<html lang="en">
+<!-- cspell:ignoreRegExp /[ㄱ-ㆎ가-힣]+/gu -->
+<!-- The Korean UI strings (see I18N in the script) are prose in a language
+     the spell checker has no dictionary for, so Hangul runs are skipped. -->
+<html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Self-hosted Shorebird code-push control plane — apps, releases, patches, rollouts, analytics, and team management.">
+<meta name="description" content="셀프 호스팅 Shorebird 코드 푸시 컨트롤 플레인 — 앱, 릴리스, 패치, 롤아웃, 분석, 팀 관리.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🐦%3C/text%3E%3C/svg%3E">
-<title>Shorebird Console</title>
+<title>Shorebird 콘솔</title>
 <style>
 /* Monochrome two-tone — ink + paper with a grayscale ramp. There is no hue:
    the "accent" is ink itself, and state is conveyed by FILL/WEIGHT, not color
    (active = solid ink pill, inactive = light chip). */
 :root{
   --font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,"Cascadia Code",Consolas,monospace;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,"Cascadia Code",Consolas,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",monospace;
   --bg:#f4f4f5; --panel:#ffffff; --panel-2:#f0f0f1; --border:#dedede;
   --text:#0d0d0d; --muted:#6b6b6e; --faint:#a1a1a5;
   --accent:#141414; --accent-2:#000000; --accent-fg:#ffffff; --accent-soft:#e9e9ea;
@@ -180,7 +183,7 @@ hr{border:none;height:0;margin:1.1rem 0}
 .gate-brand .gt{font-weight:700;font-size:1.2rem;letter-spacing:-.015em}
 .gate-brand .gs{font:10.5px/1.4 var(--mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:.15rem}
 .block{width:100%;justify-content:center;display:inline-flex;align-items:center}
-.gate-foot{display:flex;align-items:center;justify-content:space-between;margin-top:.1rem}
+.gate-foot{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:space-between;margin-top:.1rem}
 
 .shell{display:grid;grid-template-columns:288px 1fr;min-height:100vh}
 .side{position:sticky;top:0;align-self:start;height:100vh;display:flex;flex-direction:column;
@@ -190,7 +193,8 @@ hr{border:none;height:0;margin:1.1rem 0}
 .side-top .logo{font-size:1.25rem}
 .conn{display:flex;align-items:center;gap:.42rem;font:11px/1.4 var(--mono);color:var(--muted);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.side-actions{display:flex;gap:.4rem}
+.side-actions{display:flex;flex-wrap:wrap;gap:.4rem}
+.side-actions button{white-space:nowrap}
 .side-scroll{flex:1;overflow-y:auto;padding:.85rem}
 .nav-h{font:600 10.5px/1.4 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--muted);
   padding:.4rem .8rem .55rem;display:flex;align-items:center;justify-content:space-between}
@@ -252,6 +256,13 @@ hr{border:none;height:0;margin:1.1rem 0}
 .modal p{margin:0 0 1.2rem;color:var(--muted);font-size:13.5px;line-height:1.55}
 .modal .actions{display:flex;justify-content:flex-end;gap:.6rem}
 .applist li:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:10px}
+
+/* Hangul has no letter case and the mono stacks have no Hangul glyphs (the
+   fallback sets every syllable full-width), so the tracked-out uppercase mono
+   label style only spreads Korean words apart. Use the UI font, tighter. */
+:lang(ko) label,:lang(ko) th,:lang(ko) .stat .l,:lang(ko) .nav-h,:lang(ko) .section h2,
+:lang(ko) .gate-brand .gs,:lang(ko) .copybtn{font-family:var(--font);letter-spacing:.01em}
+:lang(ko){word-break:keep-all}
 </style>
 </head>
 <body>
@@ -260,18 +271,21 @@ hr{border:none;height:0;margin:1.1rem 0}
 <div id="gate" class="gate">
   <div class="gate-card">
     <div class="gate-brand"><span class="logo" aria-hidden="true">🐦</span>
-      <div><div class="gt">Shorebird Console</div>
-        <div class="gs">Self-hosted code-push control plane</div></div>
+      <div><div class="gt" data-i18n="app.title">Shorebird 콘솔</div>
+        <div class="gs" data-i18n="gate.subtitle">셀프 호스팅 코드 푸시 컨트롤 플레인</div></div>
     </div>
-    <div class="field"><label for="base">Server base URL</label>
-      <input id="base" placeholder="(same origin)" autocomplete="off"></div>
-    <div class="field"><label for="key">API key</label>
-      <input id="key" type="password" placeholder="sb_api_… or bootstrap key" autocomplete="off"></div>
-    <button class="primary block" id="connectBtn">Connect</button>
+    <div class="field"><label for="base" data-i18n="gate.base">서버 기본 URL</label>
+      <input id="base" placeholder="(비워 두면 동일 출처)" data-i18n-attr="placeholder:gate.basePh" autocomplete="off"></div>
+    <div class="field"><label for="key" data-i18n="gate.key">API 키</label>
+      <input id="key" type="password" placeholder="sb_api_… 또는 부트스트랩 키" data-i18n-attr="placeholder:gate.keyPh" autocomplete="off"></div>
+    <button class="primary block" id="connectBtn" data-i18n="gate.connect">연결</button>
     <div id="connError"></div>
     <div class="gate-foot">
-      <div class="status" id="status"><span class="led"></span><span id="statusText">Not connected</span></div>
-      <button id="themeBtn" class="sm" title="Toggle theme">Theme</button>
+      <div class="status" id="status"><span class="led"></span><span id="statusText">연결 안 됨</span></div>
+      <div class="side-actions">
+        <button id="langBtn" class="sm" lang="en" title="Switch to English" data-i18n="lang.btn" data-i18n-attr="title:lang.title;lang:lang.target">English</button>
+        <button id="themeBtn" class="sm" title="테마 전환" data-i18n="theme.btn" data-i18n-attr="title:theme.title">테마</button>
+      </div>
     </div>
   </div>
 </div>
@@ -281,26 +295,27 @@ hr{border:none;height:0;margin:1.1rem 0}
   <aside class="side">
     <div class="side-top">
       <div class="brand"><span class="logo" aria-hidden="true">🐦</span> Shorebird</div>
-      <div class="conn"><span class="led ok"></span><span id="connHost">connected</span></div>
+      <div class="conn"><span class="led ok"></span><span id="connHost">연결됨</span></div>
       <div class="side-actions">
-        <button class="sm" id="themeBtn2" title="Toggle theme">Theme</button>
-        <button class="sm" id="disconnectBtn">Disconnect</button>
+        <button class="sm" id="themeBtn2" title="테마 전환" data-i18n="theme.btn" data-i18n-attr="title:theme.title">테마</button>
+        <button class="sm" id="langBtn2" lang="en" title="Switch to English" data-i18n="lang.btn" data-i18n-attr="title:lang.title;lang:lang.target">English</button>
+        <button class="sm" id="disconnectBtn" data-i18n="side.disconnect">연결 해제</button>
       </div>
     </div>
     <div class="side-scroll">
-      <div class="nav-h">Apps <span class="pill" id="appCount">0</span></div>
-      <input id="appFilter" class="side-filter" placeholder="Filter apps… (/)" autocomplete="off" aria-label="Filter apps" hidden>
+      <div class="nav-h"><span data-i18n="nav.apps">앱</span> <span class="pill" id="appCount">0</span></div>
+      <input id="appFilter" class="side-filter" placeholder="앱 검색… (/)" data-i18n-attr="placeholder:nav.filterPh;aria-label:nav.filterAria" autocomplete="off" aria-label="앱 검색" hidden>
       <ul class="applist" id="appList" role="list"></ul>
-      <div class="empty" id="appsEmpty">No apps yet — create one below.</div>
+      <div class="empty" id="appsEmpty" data-i18n="nav.appsEmpty">아직 앱이 없습니다 — 아래에서 만들어 보세요.</div>
       <details class="create">
-        <summary>+ New app</summary>
+        <summary data-i18n="nav.newApp">+ 새 앱</summary>
         <div class="create-bd">
-          <div class="field"><label for="orgSelect">Organization</label><select id="orgSelect"></select></div>
-          <div class="field"><label for="newAppName">Display name</label><input id="newAppName" placeholder="My App"></div>
-          <button class="primary sm block" id="createAppBtn" disabled>Create app</button>
+          <div class="field"><label for="orgSelect" data-i18n="nav.org">조직</label><select id="orgSelect"></select></div>
+          <div class="field"><label for="newAppName" data-i18n="nav.displayName">표시 이름</label><input id="newAppName" placeholder="내 앱" data-i18n-attr="placeholder:nav.displayNamePh"></div>
+          <button class="primary sm block" id="createAppBtn" disabled data-i18n="nav.createApp">앱 만들기</button>
         </div>
       </details>
-      <div class="nav-h nav-team">Team</div>
+      <div class="nav-h nav-team" data-i18n="nav.team">팀</div>
       <ul class="applist" id="orgList"></ul>
       <div class="empty" id="orgsEmpty">—</div>
     </div>
@@ -314,7 +329,477 @@ hr{border:none;height:0;margin:1.1rem 0}
 "use strict";
 (function(){
   const $ = (id)=>document.getElementById(id);
-  const LS = {base:"sb_console_base", key:"sb_console_key", theme:"sb_console_theme"};
+  const LS = {base:"sb_console_base", key:"sb_console_key", theme:"sb_console_theme", lang:"sb_console_lang"};
+
+  // ---------- i18n ----------
+  // Every UI string, per language. A value is a string with {name}
+  // placeholders, a function of those vars (for English plurals), or an array.
+  // Keys ending in _html are inserted as markup, so their vars must already
+  // be escaped; every other key is plain text and is escaped (or set via
+  // textContent) by the caller. Values the server owns — error messages,
+  // app/org names, event types — are shown as sent.
+  const I18N = {
+    ko: {
+      "app.title":"Shorebird 콘솔",
+      "app.description":"셀프 호스팅 Shorebird 코드 푸시 컨트롤 플레인 — 앱, 릴리스, 패치, 롤아웃, 분석, 팀 관리.",
+      "gate.subtitle":"셀프 호스팅 코드 푸시 컨트롤 플레인",
+      "gate.base":"서버 기본 URL",
+      "gate.basePh":"(비워 두면 동일 출처)",
+      "gate.key":"API 키",
+      "gate.keyPh":"sb_api_… 또는 부트스트랩 키",
+      "gate.connect":"연결",
+      "conn.error_html":"연결할 수 없습니다: {msg}{http}. 서버 기본 URL과 API 키를 확인하세요.",
+      "lang.btn":"English",
+      "lang.title":"Switch to English",
+      "lang.target":"en",
+      "theme.btn":"테마",
+      "theme.title":"테마 전환",
+      "theme.toast":"테마: {mode}",
+      "theme.auto":"자동",
+      "theme.light":"라이트",
+      "theme.dark":"다크",
+      "side.disconnect":"연결 해제",
+      "nav.apps":"앱",
+      "nav.filterPh":"앱 검색… (/)",
+      "nav.filterAria":"앱 검색",
+      "nav.appsEmpty":"아직 앱이 없습니다 — 아래에서 만들어 보세요.",
+      "nav.newApp":"+ 새 앱",
+      "nav.org":"조직",
+      "nav.displayName":"표시 이름",
+      "nav.displayNamePh":"내 앱",
+      "nav.createApp":"앱 만들기",
+      "nav.team":"팀",
+      "conn.notConnected":"연결 안 됨",
+      "conn.noKey":"API 키 없음",
+      "conn.connecting":"연결 중…",
+      "conn.connected":v=>"연결됨 · 앱 "+v.n+"개",
+      "conn.failed":"연결 실패",
+      "conn.unreachable":"서버 응답 없음 (네트워크 또는 CORS 문제)",
+      "time.justNow":"방금 전",
+      "time.min":"{n}분 전",
+      "time.hour":"{n}시간 전",
+      "time.day":"{n}일 전",
+      "common.loading":"불러오는 중…",
+      "common.you":"나",
+      "common.remove":"제거",
+      "common.copy":"복사",
+      "common.cancel":"취소",
+      "common.confirm":"확인",
+      "field.email":"이메일",
+      "field.role":"역할",
+      "field.member":"멤버",
+      "field.user":"사용자",
+      "field.expires":"만료일",
+      "role.owner":"소유자",
+      "role.admin":"관리자",
+      "role.developer":"개발자",
+      "role.member":"멤버",
+      "state.draft":"초안",
+      "state.active":"활성",
+      "state.uploading":"업로드 중",
+      "state.ready":"준비됨",
+      "state.invalidated":"무효화됨",
+      "state.archived":"보관됨",
+      "state.withdrawn":"회수됨",
+      "state.pending":"대기 중",
+      "state.verified":"검증됨",
+      "state.failed":"실패",
+      "apps.noMatch":"“{q}”와(과) 일치하는 앱이 없습니다.",
+      "apps.meta_html":"릴리스 {rel} · 패치 {patch}",
+      "orgs.none":"(조직 없음)",
+      "orgs.fallback":"조직 {id}",
+      "team.title_html":"팀 · {name}",
+      "team.viewOnly_html":"<b>{role}</b> 권한이므로 보기만 가능합니다. 소유자와 관리자만 멤버를 초대하고 관리할 수 있습니다.",
+      "team.membersUnavailable":"멤버 정보를 불러올 수 없습니다 (HTTP {status}).",
+      "team.invite":"멤버 초대",
+      "team.sendInvite":"초대 보내기",
+      "dom.title":"허용된 이메일 도메인",
+      "dom.restricted":"제한됨",
+      "dom.unrestricted":"제한 없음",
+      "dom.label":"도메인",
+      "dom.help_html":"여러 도메인은 쉼표로 구분해 입력하세요. 비워 두면 모든 주소를 허용합니다. 새 초대와 앱 협업자 추가에 적용되며, "+
+        "기존 멤버의 접근 권한은 그대로 유지됩니다. 정확히 일치하는 도메인만 허용되므로 "+
+        "<code>company.com</code>에는 <code>mail.company.com</code>이 포함되지 않습니다.",
+      "dom.save":"도메인 저장",
+      "dom.saved_html":"<code>{list}</code> 도메인으로 제한했습니다. 기존 멤버의 접근 권한은 유지됩니다.",
+      "dom.cleared":"제한을 해제했습니다 — 모든 이메일 주소를 추가할 수 있습니다.",
+      "inv.pending":"대기 중인 초대",
+      "inv.none":"대기 중인 초대가 없습니다.",
+      "inv.copyLink":"링크 복사",
+      "inv.revoke":"초대 취소",
+      "inv.created_html":"초대를 만들었습니다. 이 링크를 공유하세요:<br><code>{url}</code>",
+      "cu.title":"사용자 + API 키 생성",
+      "cu.name":"이름 (선택)",
+      "cu.namePh":"CI 봇",
+      "cu.btn":"사용자 + 키 생성",
+      "cu.created_html":"사용자를 만들었습니다. API 키 (지금 복사하세요 — 한 번만 표시됩니다):<br><code>{key}</code>",
+      "collab.title":"협업자",
+      "collab.unavailable":"협업자 정보를 불러올 수 없습니다 (HTTP {status}). 조직 멤버는 이미 이 앱에 접근할 수 있습니다.",
+      "collab.viewOnly":"보기 전용 — 협업자를 추가하거나 제거하려면 이 앱에 대한 소유자/관리자 역할이 필요합니다.",
+      "collab.none":"협업자가 없습니다 (조직 멤버는 이미 접근 권한이 있습니다).",
+      "collab.addLabel":"협업자 추가 (기존 사용자의 이메일)",
+      "collab.addBtn":"협업자 추가",
+      "toast.inviteCopied":"초대 링크를 복사했습니다.",
+      "toast.domFailed":"도메인 저장 실패: {msg}",
+      "toast.enterEmail":"이메일을 입력하세요.",
+      "toast.inviteFailed":"초대 실패: {msg}",
+      "toast.roleUpdated":"역할을 변경했습니다.",
+      "toast.updateFailed":"변경 실패: {msg}",
+      "toast.memberRemoved":"멤버를 제거했습니다.",
+      "toast.removeFailed":"제거 실패: {msg}",
+      "toast.inviteRevoked":"초대를 취소했습니다.",
+      "toast.revokeFailed":"초대 취소 실패: {msg}",
+      "toast.createFailed":"생성 실패: {msg}",
+      "toast.collabAdded":"협업자를 추가했습니다.",
+      "toast.addFailed":"추가 실패: {msg}",
+      "toast.collabRemoved":"협업자를 제거했습니다.",
+      "toast.enterKey":"API 키를 입력하세요.",
+      "toast.orgsUnavailable":"앱은 불러왔지만 조직 정보를 불러올 수 없습니다 ({status}).",
+      "toast.enterName":"표시 이름을 입력하세요.",
+      "toast.appCreated":"“{name}” 앱을 만들었습니다.",
+      "toast.copied":"클립보드에 복사했습니다.",
+      "toast.copyFailed":"복사하지 못했습니다.",
+      "app.copyId":"앱 ID 복사",
+      "app.meta_html":"릴리스 {rel} · 패치 {patch} · {channels}",
+      "tab.overview":"개요",
+      "tab.releases":"릴리스",
+      "tab.analytics":"분석",
+      "tab.team":"팀",
+      "ov.totalEvents":"전체 이벤트",
+      "ov.uniqueClients":"고유 클라이언트",
+      "ov.livePatches":"라이브 패치",
+      "ov.noReleases":"아직 릴리스가 없습니다 — 앱 디렉터리에서 릴리스하세요.",
+      "ov.noLive_html":"<b>{version}</b> 릴리스에 라이브 패치가 없습니다.",
+      "ov.onLatest_html":"최신 릴리스 <b>{version}</b> 기준입니다 — 이전 릴리스는 릴리스 탭에서 관리하세요.",
+      "prov.title":"빌드 출처 정보",
+      "prov.platform":"플랫폼",
+      "rel.title":"릴리스",
+      "rel.unavailable":"릴리스 정보를 불러올 수 없습니다 (HTTP {status}).",
+      "rel.none":"아직 릴리스가 없습니다 — 앱 디렉터리에서 릴리스를 게시하세요:",
+      "rel.noPlatformStatus":"플랫폼 상태 없음",
+      "rel.flutterRev":"Flutter 리비전:",
+      "rel.created":"{when} 생성",
+      "rel.expand":"펼치면 패치를 불러옵니다…",
+      "ch.title":"채널",
+      "ch.none_html":"채널이 없습니다 (롤아웃 기본 채널은 <code>stable</code>입니다).",
+      "ana.loading":"분석 데이터를 불러오는 중…",
+      "patch.loading":"패치를 불러오는 중…",
+      "patch.none":"이 릴리스에 패치가 없습니다.",
+      "patch.unavailable":"패치 정보를 불러올 수 없습니다 (HTTP {status}).",
+      "patch.rolledBack":"롤백됨",
+      "patch.live_html":"라이브 · {channel} · {pct}%",
+      "patch.withdrawn":"회수됨",
+      "patch.title_html":"패치 #{n}",
+      "patch.artifacts":v=>"아티팩트 "+v.n+"개",
+      "patch.build_html":"빌드: <b>{status}</b>",
+      "patch.notesPh":"메모 추가 — 이 패치를 배포한 이유",
+      "patch.saveNotes":"메모 저장",
+      "patch.channel":"채널",
+      "patch.setRollout":"롤아웃 적용",
+      "patch.withdraw":"회수",
+      "patch.withdrawRollback":"회수 + 롤백",
+      "toast.notesSaved":"메모를 저장했습니다.",
+      "toast.notesCleared":"메모를 지웠습니다.",
+      "toast.notesFailed":"메모 저장 실패: {msg}",
+      "toast.rolloutSet":"{channel} 채널의 롤아웃을 {pct}%로 설정했습니다.",
+      "toast.rolloutFailed":"롤아웃 실패: {msg}",
+      "wd.title":"패치를 회수할까요?",
+      "wd.titleRollback":"회수하고 롤백할까요?",
+      "wd.body_html":"<b>{channel}</b> 채널에서 새 업데이트 확인 요청에 이 패치를 더 이상 제공하지 않습니다. 이미 설치한 기기는 계속 이 패치로 실행됩니다.",
+      "wd.bodyRollback_html":"<b>{channel}</b> 채널에서 패치를 회수하고 <b>이미 설치된 기기도 롤백합니다</b>. 설치된 앱은 다음 실행 시 릴리스 코드로 되돌아갑니다.",
+      "toast.withdrawn":"{channel} 채널에서 패치를 회수했습니다.",
+      "toast.withdrawnRollback":"{channel} 채널에서 패치를 회수하고 롤백했습니다.",
+      "toast.withdrawFailed":"회수 실패: {msg}",
+      "chart.noData":"데이터가 없습니다.",
+      "chart.noActivity":"활동 데이터가 없습니다.",
+      "chart.days":["일","월","화","수","목","금","토"],
+      "chart.heatTip":"{day}요일 {hh}:00 UTC — 평균 기기 {v}대",
+      "chart.hourTip":"{hh}:00 UTC — 평균 {v}",
+      "chart.hourTipRec":" · 권장 릴리스 시간대",
+      "chart.hourTipBusy":" · 최다 활동 시간",
+      "chart.recWindow":"권장 시간대",
+      "chart.busiest":"최다 활동 시간",
+      "stat.current":"현재",
+      "stat.previous":"이전",
+      "stat.change":"변화",
+      "ana.notAvailable":"제공되지 않습니다.",
+      "ana.unavailable":"불러올 수 없습니다 (HTTP {status}).",
+      "ana.adoption":"패치 적용률",
+      "ana.uniqueUsers":"고유 사용자 (30일)",
+      "ana.versionDist":"버전 분포 (최근 30일 활성)",
+      "ana.heatmap":"활동 히트맵 (28일, UTC)",
+      "ana.activeHours":"활동 시간대 (28일, UTC)",
+      "ana.newDevices":"신규 기기 (30일)",
+      "ana.installs":"패치 설치 (30일)",
+      "ana.downloads":"패치 다운로드 (30일)",
+      "ana.noAdoption":"적용률 데이터가 없습니다.",
+      "ana.release_html":"릴리스: <b>{v}</b>",
+      "ana.latest":"최신",
+      "ana.patchSeries":"패치 #{n}",
+      "ana.thisWindow":"이번 기간",
+      "ana.prevWindow":"이전 기간",
+      "ana.uniqueUsersSeries":"고유 사용자",
+      "ana.noActiveDevices":"기간 내 활성 기기가 없습니다.",
+      "ana.unknownVersion":"(알 수 없음)",
+      "ana.totalDevices":"전체 기기",
+      "ana.versions":"버전",
+      "ana.recWindow_html":"권장 릴리스 시간대: <b>{s}:00–{e}:00 UTC</b>",
+      "ana.busiest_html":"최다 활동 시간: <b>{h}:00 UTC</b>",
+      "ana.new30":"신규 (30일)",
+      "ana.prev30":"이전 30일",
+      "ana.newDevicesNote":"기간 내 처음 확인된 기기 수입니다 (합계만 제공 — 이 엔드포인트는 시계열 데이터를 제공하지 않습니다).",
+      "ana.series.installs":"설치",
+      "ana.series.downloads":"다운로드",
+      "hero.firstPatch":"첫 패치를 배포해 볼까요",
+      "hero.welcome":"환영합니다",
+      "hero.welcomeEmail_html":"환영합니다, {email}",
+      "hero.noApps":"아직 앱이 없습니다. Shorebird CLI가 이 서버를 가리키도록 설정하고 릴리스하면 앱이 여기에 자동으로 나타납니다.",
+      "hero.hasApps":"앱을 선택해 릴리스, 패치, 롤아웃, 분석을 확인하거나, 사이드바에서 팀을 관리하세요.",
+      "hero.apps":"앱",
+      "hero.orgs":"조직",
+      "qs.title":"빠른 시작",
+      "qs.body_html":"Flutter 앱 디렉터리에서 실행하세요. 기기가 이 서버에 접속할 수 있도록 <code>base_url</code>에는 "+
+        "<b>기기에서 접근 가능한</b> URL(LAN IP 또는 도메인)을 사용하세요.",
+      "qs.apiKey":"<API 키>",
+      "qs.setBaseUrl":"# 그다음 shorebird.yaml에 다음을 설정하세요:  base_url: {url}",
+    },
+    en: {
+      "app.title":"Shorebird Console",
+      "app.description":"Self-hosted Shorebird code-push control plane — apps, releases, patches, rollouts, analytics, and team management.",
+      "gate.subtitle":"Self-hosted code-push control plane",
+      "gate.base":"Server base URL",
+      "gate.basePh":"(same origin)",
+      "gate.key":"API key",
+      "gate.keyPh":"sb_api_… or bootstrap key",
+      "gate.connect":"Connect",
+      "conn.error_html":"Could not connect: {msg}{http}. Check the base URL and API key.",
+      "lang.btn":"한국어",
+      "lang.title":"한국어로 전환",
+      "lang.target":"ko",
+      "theme.btn":"Theme",
+      "theme.title":"Toggle theme",
+      "theme.toast":"Theme: {mode}",
+      "theme.auto":"auto",
+      "theme.light":"light",
+      "theme.dark":"dark",
+      "side.disconnect":"Disconnect",
+      "nav.apps":"Apps",
+      "nav.filterPh":"Filter apps… (/)",
+      "nav.filterAria":"Filter apps",
+      "nav.appsEmpty":"No apps yet — create one below.",
+      "nav.newApp":"+ New app",
+      "nav.org":"Organization",
+      "nav.displayName":"Display name",
+      "nav.displayNamePh":"My App",
+      "nav.createApp":"Create app",
+      "nav.team":"Team",
+      "conn.notConnected":"Not connected",
+      "conn.noKey":"No API key",
+      "conn.connecting":"Connecting…",
+      "conn.connected":v=>"Connected · "+v.n+" app"+(v.n===1?"":"s"),
+      "conn.failed":"Connection failed",
+      "conn.unreachable":"server unreachable (network or CORS)",
+      "time.justNow":"just now",
+      "time.min":"{n}m ago",
+      "time.hour":"{n}h ago",
+      "time.day":"{n}d ago",
+      "common.loading":"Loading…",
+      "common.you":"you",
+      "common.remove":"Remove",
+      "common.copy":"Copy",
+      "common.cancel":"Cancel",
+      "common.confirm":"Confirm",
+      "field.email":"Email",
+      "field.role":"Role",
+      "field.member":"Member",
+      "field.user":"User",
+      "field.expires":"Expires",
+      "apps.noMatch":"No apps match “{q}”.",
+      "apps.meta_html":"rel {rel} · patch {patch}",
+      "orgs.none":"(no organizations)",
+      "orgs.fallback":"org {id}",
+      "team.title_html":"Team · {name}",
+      "team.viewOnly_html":"You are a <b>{role}</b> — viewing only. Owners and admins can invite and manage members.",
+      "team.membersUnavailable":"Members unavailable (HTTP {status}).",
+      "team.invite":"Invite a member",
+      "team.sendInvite":"Send invite",
+      "dom.title":"Allowed email domains",
+      "dom.restricted":"restricted",
+      "dom.unrestricted":"unrestricted",
+      "dom.label":"Domains",
+      "dom.help_html":"Comma-separated. Leave empty to allow any address. Applies to new invitations and "+
+        "app collaborators — current members keep their access. Matching is exact, so "+
+        "<code>company.com</code> does not include <code>mail.company.com</code>.",
+      "dom.save":"Save domains",
+      "dom.saved_html":"Restricted to <code>{list}</code>. Current members keep access.",
+      "dom.cleared":"Cleared — any email address may be added.",
+      "inv.pending":"Pending invitations",
+      "inv.none":"No pending invitations.",
+      "inv.copyLink":"Copy link",
+      "inv.revoke":"Revoke",
+      "inv.created_html":"Invite created. Share this link:<br><code>{url}</code>",
+      "cu.title":"Create user + API key",
+      "cu.name":"Name (optional)",
+      "cu.namePh":"CI Bot",
+      "cu.btn":"Create user + key",
+      "cu.created_html":"User created. API key (copy now — shown once):<br><code>{key}</code>",
+      "collab.title":"Collaborators",
+      "collab.unavailable":"Collaborators unavailable (HTTP {status}). Organization members already have access to this app.",
+      "collab.viewOnly":"Viewing only — adding or removing collaborators requires an owner/admin role on this app.",
+      "collab.none":"No collaborators (org members already have access).",
+      "collab.addLabel":"Add collaborator (existing user's email)",
+      "collab.addBtn":"Add collaborator",
+      "toast.inviteCopied":"Invite link copied.",
+      "toast.domFailed":"Saving domains failed: {msg}",
+      "toast.enterEmail":"Enter an email.",
+      "toast.inviteFailed":"Invite failed: {msg}",
+      "toast.roleUpdated":"Role updated.",
+      "toast.updateFailed":"Update failed: {msg}",
+      "toast.memberRemoved":"Member removed.",
+      "toast.removeFailed":"Remove failed: {msg}",
+      "toast.inviteRevoked":"Invitation revoked.",
+      "toast.revokeFailed":"Revoke failed: {msg}",
+      "toast.createFailed":"Create failed: {msg}",
+      "toast.collabAdded":"Collaborator added.",
+      "toast.addFailed":"Add failed: {msg}",
+      "toast.collabRemoved":"Collaborator removed.",
+      "toast.enterKey":"Enter an API key.",
+      "toast.orgsUnavailable":"Apps loaded, but organizations unavailable ({status}).",
+      "toast.enterName":"Enter a display name.",
+      "toast.appCreated":"App \"{name}\" created.",
+      "toast.copied":"Copied to clipboard.",
+      "toast.copyFailed":"Copy failed.",
+      "app.copyId":"Copy app id",
+      "app.meta_html":"rel {rel} · patch {patch} · {channels}",
+      "tab.overview":"Overview",
+      "tab.releases":"Releases",
+      "tab.analytics":"Analytics",
+      "tab.team":"Team",
+      "ov.totalEvents":"Total events",
+      "ov.uniqueClients":"Unique clients",
+      "ov.livePatches":"Live patches",
+      "ov.noReleases":"No releases yet — release from your app directory.",
+      "ov.noLive_html":"No patches live on <b>{version}</b>.",
+      "ov.onLatest_html":"On latest release <b>{version}</b> — manage older releases under the Releases tab.",
+      "prov.title":"Build provenance",
+      "prov.platform":"platform",
+      "rel.title":"Releases",
+      "rel.unavailable":"Releases unavailable (HTTP {status}).",
+      "rel.none":"No releases yet — publish one from your app directory:",
+      "rel.noPlatformStatus":"no platform status",
+      "rel.flutterRev":"Flutter rev:",
+      "rel.created":"Created {when}",
+      "rel.expand":"Expand to load patches…",
+      "ch.title":"Channels",
+      "ch.none_html":"No channels (rollout defaults to <code>stable</code>).",
+      "ana.loading":"Loading analytics…",
+      "patch.loading":"Loading patches…",
+      "patch.none":"No patches for this release.",
+      "patch.unavailable":"Patches unavailable (HTTP {status}).",
+      "patch.rolledBack":"rolled back",
+      "patch.live_html":"live · {channel} · {pct}%",
+      "patch.withdrawn":"withdrawn",
+      "patch.title_html":"Patch #{n}",
+      "patch.artifacts":v=>v.n+" artifact"+(v.n===1?"":"s"),
+      "patch.build_html":"build: <b>{status}</b>",
+      "patch.notesPh":"Add notes — why this patch shipped",
+      "patch.saveNotes":"Save notes",
+      "patch.channel":"Channel",
+      "patch.setRollout":"Set rollout",
+      "patch.withdraw":"Withdraw",
+      "patch.withdrawRollback":"Withdraw + rollback",
+      "toast.notesSaved":"Notes saved.",
+      "toast.notesCleared":"Notes cleared.",
+      "toast.notesFailed":"Saving notes failed: {msg}",
+      "toast.rolloutSet":"Rollout set to {pct}% on {channel}.",
+      "toast.rolloutFailed":"Rollout failed: {msg}",
+      "wd.title":"Withdraw patch?",
+      "wd.titleRollback":"Withdraw + roll back?",
+      "wd.body_html":"Stops serving this patch to new checks on <b>{channel}</b>. Devices that already installed it keep running it.",
+      "wd.bodyRollback_html":"Withdraws the patch <b>and rolls back live devices</b> on <b>{channel}</b>. Installed apps revert to the release code on next launch.",
+      "toast.withdrawn":"Patch withdrawn on {channel}.",
+      "toast.withdrawnRollback":"Patch withdrawn with rollback on {channel}.",
+      "toast.withdrawFailed":"Withdraw failed: {msg}",
+      "chart.noData":"No data.",
+      "chart.noActivity":"No activity data.",
+      "chart.days":["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
+      "chart.heatTip":"{day} {hh}:00 UTC — {v} avg devices",
+      "chart.hourTip":"{hh}:00 UTC — {v} avg",
+      "chart.hourTipRec":" · recommended release window",
+      "chart.hourTipBusy":" · busiest hour",
+      "chart.recWindow":"Recommended window",
+      "chart.busiest":"Busiest hour",
+      "stat.current":"Current",
+      "stat.previous":"Previous",
+      "stat.change":"Change",
+      "ana.notAvailable":"Not available.",
+      "ana.unavailable":"Unavailable (HTTP {status}).",
+      "ana.adoption":"Patch adoption",
+      "ana.uniqueUsers":"Unique users (30d)",
+      "ana.versionDist":"Version distribution (30d active)",
+      "ana.heatmap":"Activity heatmap (28d, UTC)",
+      "ana.activeHours":"Active hours (28d, UTC)",
+      "ana.newDevices":"New devices (30d)",
+      "ana.installs":"Patch installs (30d)",
+      "ana.downloads":"Patch downloads (30d)",
+      "ana.noAdoption":"No adoption data.",
+      "ana.release_html":"Release: <b>{v}</b>",
+      "ana.latest":"latest",
+      "ana.patchSeries":"Patch #{n}",
+      "ana.thisWindow":"This window",
+      "ana.prevWindow":"Prev window",
+      "ana.uniqueUsersSeries":"Unique users",
+      "ana.noActiveDevices":"No active devices in window.",
+      "ana.unknownVersion":"(unknown)",
+      "ana.totalDevices":"Total devices",
+      "ana.versions":"Versions",
+      "ana.recWindow_html":"Recommended release window: <b>{s}:00–{e}:00 UTC</b>",
+      "ana.busiest_html":"Busiest hour: <b>{h}:00 UTC</b>",
+      "ana.new30":"New (30d)",
+      "ana.prev30":"Prev 30d",
+      "ana.newDevicesNote":"Devices first seen in the window (totals only — no time series provided by this endpoint).",
+      "ana.series.installs":"installs",
+      "ana.series.downloads":"downloads",
+      "hero.firstPatch":"Let’s ship your first patch",
+      "hero.welcome":"Welcome",
+      "hero.welcomeEmail_html":"Welcome, {email}",
+      "hero.noApps":"No apps yet. Point the Shorebird CLI at this server and release — your app appears here automatically.",
+      "hero.hasApps":"Select an app for releases, patches, rollouts, and analytics — or manage your team from the sidebar.",
+      "hero.apps":"Apps",
+      "hero.orgs":"Organizations",
+      "qs.title":"Quick start",
+      "qs.body_html":"From your Flutter app directory. Use a <b>device-reachable</b> URL (your LAN IP or domain) for "+
+        "<code>base_url</code> so devices can reach this server.",
+      "qs.apiKey":"<your api key>",
+      "qs.setBaseUrl":"# then set  base_url: {url}  in shorebird.yaml",
+    },
+  };
+  const LANGS = Object.keys(I18N);
+  let lang = (function(){
+    let saved=null;
+    try{ saved=localStorage.getItem(LS.lang); }catch(e){}
+    return LANGS.includes(saved) ? saved : "ko";
+  })();
+
+  // Looks a key up in the active language, falling back to English and then
+  // to the key itself so a missing entry shows up rather than blanking out.
+  function t(key, vars){
+    let v=I18N[lang][key];
+    if(v===undefined) v=I18N.en[key];
+    if(v===undefined) return key;
+    if(typeof v==="function") return v(vars||{});
+    if(typeof v!=="string" || !vars) return v;
+    return v.replace(/\{(\w+)\}/g,(m,k)=>vars[k]===undefined?m:String(vars[k]));
+  }
+  // Display label for a value the server owns (a role or a status name):
+  // translated when the dictionary knows it, otherwise shown as sent.
+  function serverLabel(prefix, value){
+    const k=prefix+"."+value;
+    return (I18N[lang][k]!==undefined || I18N.en[k]!==undefined) ? t(k) : String(value==null?"":value);
+  }
+  function roleLabel(r){ return serverLabel("role", r); }
+  function statusLabel(s){ return serverLabel("state", s); }
+  function locale(){ return lang==="ko" ? "ko-KR" : "en-US"; }
 
   const state = {
     base: localStorage.getItem(LS.base) || "",
@@ -328,6 +813,7 @@ hr{border:none;height:0;margin:1.1rem 0}
     appFilter: "",     // sidebar app filter text
     tab: "overview",   // active app-detail tab
     appData: null,     // cached data for the selected app
+    teamView: null,    // last fetched org team view (see drawTeam)
   };
 
   // Must match Api._roles. The server rejects anything else with a 400, and
@@ -343,7 +829,7 @@ hr{border:none;height:0;margin:1.1rem 0}
     return String(s==null?"":s).replace(/[&<>"']/g,c=>(
       {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
   }
-  function num(n){ return (n==null||n==="")?"—":Number(n).toLocaleString(); }
+  function num(n){ return (n==null||n==="")?"—":Number(n).toLocaleString(locale()); }
   function fmtBytes(n){
     n=Number(n)||0;
     if(n<1024) return n+" B";
@@ -353,15 +839,15 @@ hr{border:none;height:0;margin:1.1rem 0}
   }
   function relTime(iso){
     if(!iso) return "";
-    const t=Date.parse(String(iso));
-    if(isNaN(t)) return String(iso).slice(0,19).replace("T"," ");
-    const s=Math.floor((Date.now()-t)/1000);
-    if(s<0) return "just now";
-    if(s<60) return "just now";
-    const m=Math.floor(s/60); if(m<60) return m+"m ago";
-    const h=Math.floor(m/60); if(h<24) return h+"h ago";
-    const d=Math.floor(h/24); if(d<30) return d+"d ago";
-    return new Date(t).toISOString().slice(0,10);
+    const ms=Date.parse(String(iso));
+    if(isNaN(ms)) return String(iso).slice(0,19).replace("T"," ");
+    const s=Math.floor((Date.now()-ms)/1000);
+    if(s<0) return t("time.justNow");
+    if(s<60) return t("time.justNow");
+    const m=Math.floor(s/60); if(m<60) return t("time.min",{n:m});
+    const h=Math.floor(m/60); if(h<24) return t("time.hour",{n:h});
+    const d=Math.floor(h/24); if(d<30) return t("time.day",{n:d});
+    return new Date(ms).toISOString().slice(0,10);
   }
   function toast(msg, kind){
     const el=document.createElement("div");
@@ -370,9 +856,29 @@ hr{border:none;height:0;margin:1.1rem 0}
     $("toast").appendChild(el);
     setTimeout(()=>{el.style.opacity="0";el.style.transition="opacity .3s";setTimeout(()=>el.remove(),300);}, 3800);
   }
-  function setStatus(cls, text){
-    const s=$("status"); s.className="status "+(cls||"");
-    $("statusText").textContent=text;
+  // Status is kept as a key (not rendered text) so a language switch can
+  // redraw it.
+  let lastStatus={cls:"", key:"conn.notConnected", vars:null};
+  function setStatus(cls, key, vars){
+    lastStatus={cls:cls||"", key, vars:vars||null};
+    const s=$("status"); s.className="status "+lastStatus.cls;
+    $("statusText").textContent=t(key, vars);
+  }
+
+  // Static markup carries data-i18n (text) and data-i18n-attr
+  // ("attr:key;attr:key") hooks; this fills them for the active language.
+  function applyStaticI18n(){
+    document.documentElement.lang=lang;
+    document.title=t("app.title");
+    const md=document.querySelector('meta[name="description"]');
+    if(md) md.setAttribute("content", t("app.description"));
+    document.querySelectorAll("[data-i18n]").forEach(el=>{ el.textContent=t(el.getAttribute("data-i18n")); });
+    document.querySelectorAll("[data-i18n-attr]").forEach(el=>{
+      el.getAttribute("data-i18n-attr").split(";").forEach(pair=>{
+        const i=pair.indexOf(":");
+        if(i>0) el.setAttribute(pair.slice(0,i).trim(), t(pair.slice(i+1).trim()));
+      });
+    });
   }
 
   // ---------- API ----------
@@ -386,7 +892,15 @@ hr{border:none;height:0;margin:1.1rem 0}
     if(state.key) headers["Authorization"]="Bearer "+state.key;
     let body;
     if(opts.json!==undefined){ headers["Content-Type"]="application/json"; body=JSON.stringify(opts.json); }
-    const res=await fetch(apiUrl(path), {method, headers, body});
+    let res;
+    try{ res=await fetch(apiUrl(path), {method, headers, body}); }
+    catch(e){
+      // fetch only rejects when no response arrived (bad URL, CORS, server
+      // down), and its message is the browser's own English text. Flag it so
+      // the UI can say so in the active language (see errMsg).
+      const err=new Error((e&&e.message)||"network error"); err.network=true;
+      throw err;
+    }
     const ct=res.headers.get("content-type")||"";
     let data=null, text=null;
     if(ct.includes("application/json")){ try{ data=await res.json(); }catch(e){ data=null; } }
@@ -403,6 +917,9 @@ hr{border:none;height:0;margin:1.1rem 0}
     try{ return {ok:true, data:await api(method,path,opts)}; }
     catch(e){ return {ok:false, status:e.status, error:e}; }
   }
+  // Message for an api()/tryApi() error: the server's text as sent, or a
+  // translated one when the request never reached the server.
+  function errMsg(e){ return e&&e.network ? t("conn.unreachable") : ((e&&e.message)||""); }
 
   // ---------- render: app list ----------
   // Shared keyboard handler for sidebar lists: Enter/Space activates,
@@ -426,7 +943,7 @@ hr{border:none;height:0;margin:1.1rem 0}
     if(f && !apps.length){
       const li=document.createElement("li");
       li.className="empty"; li.style.cursor="default";
-      li.textContent=`No apps match “${state.appFilter}”.`;
+      li.textContent=t("apps.noMatch",{q:state.appFilter});
       ul.appendChild(li); return;
     }
     apps.forEach(a=>{
@@ -435,7 +952,7 @@ hr{border:none;height:0;margin:1.1rem 0}
       if(state.selected && state.selected.app_id===a.app_id) li.className="active";
       const plats=(a.platforms||[]).map(p=>`<span class="pill">${esc(p)}</span>`).join(" ");
       li.innerHTML=`<div class="name">${esc(a.display_name||a.app_id)}</div>`+
-        `<div class="meta">rel ${esc(a.latest_release_version||"—")} · patch ${a.latest_patch_number==null?"—":esc(a.latest_patch_number)}</div>`+
+        `<div class="meta">${t("apps.meta_html",{rel:esc(a.latest_release_version||"—"), patch:a.latest_patch_number==null?"—":esc(a.latest_patch_number)})}</div>`+
         (plats?`<div class="chips" style="margin-top:.3rem">${plats}</div>`:"");
       li.onclick=()=>selectApp(a);
       li.onkeydown=(e)=>listKeydown(e,()=>selectApp(a));
@@ -443,11 +960,13 @@ hr{border:none;height:0;margin:1.1rem 0}
     });
   }
 
+  let creatingApp=false; // a create request is in flight (see createApp)
   function renderOrgs(){
     const sel=$("orgSelect");
+    const prev=sel.value;
     sel.innerHTML="";
     if(!state.orgs.length){
-      sel.innerHTML='<option value="">(no organizations)</option>';
+      sel.innerHTML=`<option value="">${esc(t("orgs.none"))}</option>`;
       $("createAppBtn").disabled=true;
       return;
     }
@@ -455,10 +974,11 @@ hr{border:none;height:0;margin:1.1rem 0}
       const org=o.organization||o;
       const opt=document.createElement("option");
       opt.value=org.id;
-      opt.textContent=(org.name||("org "+org.id))+(o.role?"  ("+o.role+")":"");
+      opt.textContent=(org.name||t("orgs.fallback",{id:org.id}))+(o.role?"  ("+roleLabel(o.role)+")":"");
       sel.appendChild(opt);
     });
-    $("createAppBtn").disabled=false;
+    if(prev && [...sel.options].some(o=>o.value===prev)) sel.value=prev;
+    $("createAppBtn").disabled=creatingApp;
   }
 
   // ---------- team management ----------
@@ -472,16 +992,21 @@ hr{border:none;height:0;margin:1.1rem 0}
       const li=document.createElement("li");
       li.tabIndex=0; li.setAttribute("role","button");
       if(state.selectedOrg===org.id) li.className="active";
-      li.innerHTML=`<div class="name">${esc(org.name||("org "+org.id))}</div><div class="meta">${esc(role)}</div>`;
-      const open=()=>selectOrg(org.id, org.name||("org "+org.id), role);
+      li.innerHTML=`<div class="name">${esc(org.name||t("orgs.fallback",{id:org.id}))}</div><div class="meta">${esc(roleLabel(role))}</div>`;
+      const open=()=>selectOrg(org.id, org.name||t("orgs.fallback",{id:org.id}), role);
       li.onclick=open;
       li.onkeydown=(e)=>listKeydown(e,open);
       ul.appendChild(li);
     });
   }
-  function orgName(orgId){ const o=state.orgs.map(x=>x.organization||x).find(x=>x.id===orgId); return o?(o.name||("org "+orgId)):("org "+orgId); }
+  function orgName(orgId){ const o=state.orgs.map(x=>x.organization||x).find(x=>x.id===orgId); return (o&&o.name)||t("orgs.fallback",{id:orgId}); }
+  // Option values stay the server's role names; only the visible label is
+  // translated.
+  function roleOptions(selected){
+    return ROLES.map(r=>`<option value="${r}"${r===selected?" selected":""}>${esc(roleLabel(r))}</option>`).join("");
+  }
   function roleSelect(userId, role){
-    return `<select data-role-user="${userId}">`+ROLES.map(r=>`<option value="${r}"${r===role?" selected":""}>${r}</option>`).join("")+`</select>`;
+    return `<select data-role-user="${userId}">`+roleOptions(role)+`</select>`;
   }
   function okBox(html){ return `<div style="margin-top:.5rem;padding:.5rem .6rem;border:1px solid var(--line,#ccc);border-radius:8px;font-size:12px">${html}</div>`; }
 
@@ -496,56 +1021,63 @@ hr{border:none;height:0;margin:1.1rem 0}
       isAdmin?tryApi("GET","/admin/orgs/"+orgId+"/invitations"):Promise.resolve({ok:false,status:403}),
       isAdmin?tryApi("GET","/admin/orgs/"+orgId+"/domains"):Promise.resolve({ok:false,status:403})
     ]);
+    // Another org or an app was opened while this was loading; it owns
+    // #detail now.
+    if(state.selectedOrg!==orgId || state.selected) return;
     const members=mRes.ok?((mRes.data&&mRes.data.members)||[]):[];
     const invites=iRes.ok?((iRes.data&&iRes.data.invitations)||[]):[];
     const domains=dRes.ok?((dRes.data&&dRes.data.domains)||[]):[];
-    d.innerHTML=renderTeam(orgId,name,role,isAdmin,members,invites,mRes,domains);
-    wireTeam(orgId,isAdmin);
+    state.teamView={orgId,role,isAdmin,members,invites,mRes,domains};
+    drawTeam();
+  }
+  // Draws the team view from the last fetch, so a language switch can redraw
+  // it without a reload.
+  function drawTeam(){
+    const v=state.teamView;
+    $("detail").innerHTML=renderTeam(v.orgId,orgName(v.orgId),v.role,v.isAdmin,v.members,v.invites,v.mRes,v.domains);
+    wireTeam(v.orgId,v.isAdmin);
   }
 
   function renderTeam(orgId,name,role,isAdmin,members,invites,mRes,domains){
     const meId=state.me&&state.me.user_id;
-    let h=`<div class="panel"><div class="hd"><span>Team · ${esc(name)}</span><span class="pill">${esc(role)}</span></div><div class="bd">`;
-    if(!isAdmin) h+=`<div class="empty" style="margin-bottom:.6rem">You are a <b>${esc(role)}</b> — viewing only. Owners and admins can invite and manage members.</div>`;
-    if(!mRes.ok){ h+=`<div class="empty">Members unavailable (HTTP ${mRes.status||"?"}).</div>`; }
+    let h=`<div class="panel"><div class="hd"><span>${t("team.title_html",{name:esc(name)})}</span><span class="pill">${esc(roleLabel(role))}</span></div><div class="bd">`;
+    if(!isAdmin) h+=`<div class="empty" style="margin-bottom:.6rem">${t("team.viewOnly_html",{role:esc(roleLabel(role))})}</div>`;
+    if(!mRes.ok){ h+=`<div class="empty">${esc(t("team.membersUnavailable",{status:mRes.status||"?"}))}</div>`; }
     else {
-      h+=`<table><thead><tr><th>Member</th><th>Role</th>${isAdmin?"<th></th>":""}</tr></thead><tbody>`;
+      h+=`<table><thead><tr><th>${esc(t("field.member"))}</th><th>${esc(t("field.role"))}</th>${isAdmin?"<th></th>":""}</tr></thead><tbody>`;
       members.forEach(m=>{
-        const you=m.user_id===meId?' <span class="pill">you</span>':'';
+        const you=m.user_id===meId?` <span class="pill">${esc(t("common.you"))}</span>`:'';
         h+=`<tr><td>${esc(m.email)}${you}${m.display_name?`<div class="meta">${esc(m.display_name)}</div>`:""}</td>`+
-           `<td>${isAdmin?roleSelect(m.user_id,m.role):esc(m.role)}</td>`+
-           (isAdmin?`<td><button data-remove-member="${m.user_id}">Remove</button></td>`:"")+`</tr>`;
+           `<td>${isAdmin?roleSelect(m.user_id,m.role):esc(roleLabel(m.role))}</td>`+
+           (isAdmin?`<td><button data-remove-member="${m.user_id}">${esc(t("common.remove"))}</button></td>`:"")+`</tr>`;
       });
       h+=`</tbody></table>`;
     }
     h+=`</div></div>`;
     if(isAdmin){
-      h+=`<div class="section"><div class="panel"><div class="hd">Invite a member</div><div class="bd">`+
-         `<div class="field" style="margin-bottom:.5rem"><label for="invEmail">Email</label><input id="invEmail" placeholder="teammate@company.com"></div>`+
-         `<div class="field" style="margin-bottom:.5rem"><label for="invRole">Role</label><select id="invRole">${ROLES.map(r=>`<option value="${r}"${r==="developer"?" selected":""}>${r}</option>`).join("")}</select></div>`+
-         `<button class="primary" id="inviteBtn">Send invite</button><div id="inviteOut"></div></div></div></div>`;
+      h+=`<div class="section"><div class="panel"><div class="hd">${esc(t("team.invite"))}</div><div class="bd">`+
+         `<div class="field" style="margin-bottom:.5rem"><label for="invEmail">${esc(t("field.email"))}</label><input id="invEmail" placeholder="teammate@company.com"></div>`+
+         `<div class="field" style="margin-bottom:.5rem"><label for="invRole">${esc(t("field.role"))}</label><select id="invRole">${roleOptions("developer")}</select></div>`+
+         `<button class="primary" id="inviteBtn">${esc(t("team.sendInvite"))}</button><div id="inviteOut"></div></div></div></div>`;
       // Domain allowlist: governs who can be *added* from now on (invitations
       // and app collaborators). Existing members are never evicted by it.
       const dl=(domains||[]).join(", ");
       h+=`<div class="section"><div class="panel"><div class="hd">`+
-         `<span>Allowed email domains</span>`+
-         `<span class="pill${dl?" active":""}">${dl?"restricted":"unrestricted"}</span></div><div class="bd">`+
-         `<div class="field" style="margin-bottom:.5rem"><label for="domList">Domains</label>`+
+         `<span>${esc(t("dom.title"))}</span>`+
+         `<span class="pill${dl?" active":""}">${esc(t(dl?"dom.restricted":"dom.unrestricted"))}</span></div><div class="bd">`+
+         `<div class="field" style="margin-bottom:.5rem"><label for="domList">${esc(t("dom.label"))}</label>`+
          `<input id="domList" placeholder="company.com, company.co.uk" value="${esc(dl)}"></div>`+
-         `<div class="muted" style="font-size:12.5px;margin-bottom:.5rem">`+
-         `Comma-separated. Leave empty to allow any address. Applies to new invitations and `+
-         `app collaborators — current members keep their access. Matching is exact, so `+
-         `<code>company.com</code> does not include <code>mail.company.com</code>.</div>`+
-         `<button class="primary" id="domSaveBtn">Save domains</button><div id="domOut"></div>`+
+         `<div class="muted" style="font-size:12.5px;margin-bottom:.5rem">${t("dom.help_html")}</div>`+
+         `<button class="primary" id="domSaveBtn">${esc(t("dom.save"))}</button><div id="domOut"></div>`+
          `</div></div></div>`;
-      h+=`<div class="section"><div class="panel"><div class="hd">Pending invitations <span class="pill">${invites.length}</span></div><div class="bd">`;
-      if(!invites.length) h+=`<div class="empty">No pending invitations.</div>`;
+      h+=`<div class="section"><div class="panel"><div class="hd">${esc(t("inv.pending"))} <span class="pill">${invites.length}</span></div><div class="bd">`;
+      if(!invites.length) h+=`<div class="empty">${esc(t("inv.none"))}</div>`;
       else{
-        h+=`<table><thead><tr><th>Email</th><th>Role</th><th>Expires</th><th></th></tr></thead><tbody>`;
+        h+=`<table><thead><tr><th>${esc(t("field.email"))}</th><th>${esc(t("field.role"))}</th><th>${esc(t("field.expires"))}</th><th></th></tr></thead><tbody>`;
         invites.forEach(iv=>{
           const link=`${location.origin}/api/v1/invitations/${iv.token}/accept`;
-          h+=`<tr><td>${esc(iv.email)}</td><td>${esc(iv.role)}</td><td class="meta">${esc((iv.expires_at||"").slice(0,10))}</td>`+
-             `<td><button data-copy="${esc(link)}">Copy link</button> <button data-revoke="${esc(iv.token)}">Revoke</button></td></tr>`;
+          h+=`<tr><td>${esc(iv.email)}</td><td>${esc(roleLabel(iv.role))}</td><td class="meta">${esc((iv.expires_at||"").slice(0,10))}</td>`+
+             `<td><button data-copy="${esc(link)}">${esc(t("inv.copyLink"))}</button> <button data-revoke="${esc(iv.token)}">${esc(t("inv.revoke"))}</button></td></tr>`;
         });
         h+=`</tbody></table>`;
       }
@@ -554,10 +1086,10 @@ hr{border:none;height:0;margin:1.1rem 0}
       // account on an email conflict, so it can hand out a key for anyone).
       // Only root-org admins can do it, so don't offer the form to anyone else.
       if(orgId===ROOT_ORG_ID){
-        h+=`<div class="section"><div class="panel"><div class="hd">Create user + API key</div><div class="bd">`+
-           `<div class="field" style="margin-bottom:.5rem"><label for="cuEmail">Email</label><input id="cuEmail" placeholder="ci@company.com"></div>`+
-           `<div class="field" style="margin-bottom:.5rem"><label for="cuName">Name (optional)</label><input id="cuName" placeholder="CI Bot"></div>`+
-           `<button class="primary" id="createUserBtn">Create user + key</button><div id="cuOut"></div></div></div></div>`;
+        h+=`<div class="section"><div class="panel"><div class="hd">${esc(t("cu.title"))}</div><div class="bd">`+
+           `<div class="field" style="margin-bottom:.5rem"><label for="cuEmail">${esc(t("field.email"))}</label><input id="cuEmail" placeholder="ci@company.com"></div>`+
+           `<div class="field" style="margin-bottom:.5rem"><label for="cuName">${esc(t("cu.name"))}</label><input id="cuName" placeholder="${esc(t("cu.namePh"))}"></div>`+
+           `<button class="primary" id="createUserBtn">${esc(t("cu.btn"))}</button><div id="cuOut"></div></div></div></div>`;
       }
     }
     return h;
@@ -569,7 +1101,7 @@ hr{border:none;height:0;margin:1.1rem 0}
     document.querySelectorAll("[data-role-user]").forEach(sel=>{ sel.onchange=()=>changeRole(orgId, sel.getAttribute("data-role-user"), sel.value); });
     document.querySelectorAll("[data-remove-member]").forEach(b=>{ b.onclick=async()=>{ await removeMember(orgId,b.getAttribute("data-remove-member")); reload(); }; });
     document.querySelectorAll("[data-revoke]").forEach(b=>{ b.onclick=async()=>{ await revokeInvite(orgId,b.getAttribute("data-revoke")); reload(); }; });
-    document.querySelectorAll("[data-copy]").forEach(b=>{ b.onclick=()=>{ if(navigator.clipboard) navigator.clipboard.writeText(b.getAttribute("data-copy")); toast("Invite link copied.","ok"); }; });
+    document.querySelectorAll("[data-copy]").forEach(b=>{ b.onclick=()=>{ if(navigator.clipboard) navigator.clipboard.writeText(b.getAttribute("data-copy")); toast(t("toast.inviteCopied"),"ok"); }; });
     const inv=$("inviteBtn"); if(inv) inv.onclick=()=>sendInvite(orgId);
     const cu=$("createUserBtn"); if(cu) cu.onclick=()=>createUser();
     const ds=$("domSaveBtn"); if(ds) ds.onclick=()=>saveDomains(orgId);
@@ -583,54 +1115,54 @@ hr{border:none;height:0;margin:1.1rem 0}
       const r=await api("PUT","/admin/orgs/"+orgId+"/domains?domains="+encodeURIComponent(raw));
       const list=(r.domains||[]);
       $("domOut").innerHTML=okBox(list.length
-        ? `Restricted to <code>${esc(list.join(", "))}</code>. Current members keep access.`
-        : "Cleared — any email address may be added.");
+        ? t("dom.saved_html",{list:esc(list.join(", "))})
+        : esc(t("dom.cleared")));
       selectOrg(orgId, orgName(orgId), state.selectedOrgRole);
-    }catch(e){ toast("Saving domains failed: "+e.message,"err"); }
+    }catch(e){ toast(t("toast.domFailed",{msg:errMsg(e)}),"err"); }
   }
 
   async function sendInvite(orgId){
     const email=$("invEmail").value.trim(); const role=$("invRole").value;
-    if(!email){ toast("Enter an email.","err"); return; }
+    if(!email){ toast(t("toast.enterEmail"),"err"); return; }
     try{
       const r=await api("POST","/admin/orgs/"+orgId+"/invitations?email="+encodeURIComponent(email)+"&role="+role);
-      $("inviteOut").innerHTML=okBox(`Invite created. Share this link:<br><code>${esc(r.accept_url)}</code>`);
+      $("inviteOut").innerHTML=okBox(t("inv.created_html",{url:esc(r.accept_url)}));
       $("invEmail").value="";
       selectOrg(orgId, orgName(orgId), state.selectedOrgRole);
-    }catch(e){ toast("Invite failed: "+e.message,"err"); }
+    }catch(e){ toast(t("toast.inviteFailed",{msg:errMsg(e)}),"err"); }
   }
   async function changeRole(orgId,userId,role){
-    try{ await api("PATCH","/admin/orgs/"+orgId+"/members/"+userId+"?role="+role); toast("Role updated.","ok"); }
-    catch(e){ toast("Update failed: "+e.message,"err"); }
+    try{ await api("PATCH","/admin/orgs/"+orgId+"/members/"+userId+"?role="+role); toast(t("toast.roleUpdated"),"ok"); }
+    catch(e){ toast(t("toast.updateFailed",{msg:errMsg(e)}),"err"); }
   }
   async function removeMember(orgId,userId){
-    try{ await api("DELETE","/admin/orgs/"+orgId+"/members/"+userId); toast("Member removed.","ok"); }
-    catch(e){ toast("Remove failed: "+e.message,"err"); }
+    try{ await api("DELETE","/admin/orgs/"+orgId+"/members/"+userId); toast(t("toast.memberRemoved"),"ok"); }
+    catch(e){ toast(t("toast.removeFailed",{msg:errMsg(e)}),"err"); }
   }
   async function revokeInvite(orgId,token){
-    try{ await api("DELETE","/admin/orgs/"+orgId+"/invitations/"+encodeURIComponent(token)); toast("Invitation revoked.","ok"); }
-    catch(e){ toast("Revoke failed: "+e.message,"err"); }
+    try{ await api("DELETE","/admin/orgs/"+orgId+"/invitations/"+encodeURIComponent(token)); toast(t("toast.inviteRevoked"),"ok"); }
+    catch(e){ toast(t("toast.revokeFailed",{msg:errMsg(e)}),"err"); }
   }
   async function createUser(){
     const email=$("cuEmail").value.trim(); const name=$("cuName").value.trim();
-    if(!email){ toast("Enter an email.","err"); return; }
+    if(!email){ toast(t("toast.enterEmail"),"err"); return; }
     try{
       const r=await api("POST","/admin/users?email="+encodeURIComponent(email)+(name?"&name="+encodeURIComponent(name):""));
-      $("cuOut").innerHTML=okBox(`User created. API key (copy now — shown once):<br><code>${esc(r.api_key)}</code>`);
+      $("cuOut").innerHTML=okBox(t("cu.created_html",{key:esc(r.api_key)}));
       $("cuEmail").value=""; $("cuName").value="";
-    }catch(e){ toast("Create failed: "+e.message,"err"); }
+    }catch(e){ toast(t("toast.createFailed",{msg:errMsg(e)}),"err"); }
   }
 
   // ---------- app collaborators (in app detail) ----------
   // Team tab: app collaborators (org members already have access implicitly).
   async function renderTeamTab(panel){
     const appId=state.appData.appId;
-    panel.innerHTML=`<div class="panel"><div class="hd">Collaborators</div><div class="bd"><div class="empty">Loading…</div></div></div>`;
+    panel.innerHTML=`<div class="panel"><div class="hd">${esc(t("collab.title"))}</div><div class="bd"><div class="empty">${esc(t("common.loading"))}</div></div></div>`;
     const res=await tryApi("GET","/admin/apps/"+encodeURIComponent(appId)+"/collaborators");
     if(state.tab!=="team" || !state.selected || state.selected.app_id!==appId) return;
     if(!res.ok){
-      panel.innerHTML=`<div class="panel"><div class="hd">Collaborators</div><div class="bd">`+
-        `<div class="empty">Collaborators unavailable (HTTP ${res.status||"?"}). Organization members already have access to this app.</div></div></div>`;
+      panel.innerHTML=`<div class="panel"><div class="hd">${esc(t("collab.title"))}</div><div class="bd">`+
+        `<div class="empty">${esc(t("collab.unavailable",{status:res.status||"?"}))}</div></div></div>`;
       return;
     }
     const collabs=(res.data&&res.data.collaborators)||[];
@@ -638,16 +1170,16 @@ hr{border:none;height:0;margin:1.1rem 0}
     // or removing collaborators is an admin action, so a plain developer sees
     // the list read-only rather than buttons that answer 403.
     const canManage=!!(res.data&&res.data.can_manage);
-    let h=`<div class="panel"><div class="hd">Collaborators <span class="pill">${collabs.length}</span></div><div class="bd">`;
-    if(!canManage) h+=`<div class="empty" style="margin-bottom:.6rem">Viewing only — adding or removing collaborators requires an owner/admin role on this app.</div>`;
-    h+=`<div class="scroll"><table><thead><tr><th>User</th><th>Role</th>${canManage?"<th></th>":""}</tr></thead><tbody>`;
-    if(!collabs.length) h+=`<tr><td colspan="${canManage?3:2}" class="empty">No collaborators (org members already have access).</td></tr>`;
-    collabs.forEach(c=>{ h+=`<tr><td>${esc(c.email)}</td><td>${esc(c.role)}</td>`+(canManage?`<td><button class="sm" data-rmcollab="${c.user_id}">Remove</button></td>`:"")+`</tr>`; });
+    let h=`<div class="panel"><div class="hd">${esc(t("collab.title"))} <span class="pill">${collabs.length}</span></div><div class="bd">`;
+    if(!canManage) h+=`<div class="empty" style="margin-bottom:.6rem">${esc(t("collab.viewOnly"))}</div>`;
+    h+=`<div class="scroll"><table><thead><tr><th>${esc(t("field.user"))}</th><th>${esc(t("field.role"))}</th>${canManage?"<th></th>":""}</tr></thead><tbody>`;
+    if(!collabs.length) h+=`<tr><td colspan="${canManage?3:2}" class="empty">${esc(t("collab.none"))}</td></tr>`;
+    collabs.forEach(c=>{ h+=`<tr><td>${esc(c.email)}</td><td>${esc(roleLabel(c.role))}</td>`+(canManage?`<td><button class="sm" data-rmcollab="${c.user_id}">${esc(t("common.remove"))}</button></td>`:"")+`</tr>`; });
     h+=`</tbody></table></div>`;
     if(canManage){
-      h+=`<div class="field" style="margin-top:.6rem"><label for="collabEmail">Add collaborator (existing user's email)</label><input id="collabEmail" placeholder="teammate@company.com"></div>`+
-         `<div class="field" style="margin:.4rem 0"><label for="collabRole">Role</label><select id="collabRole">${ROLES.map(r=>`<option value="${r}"${r==="developer"?" selected":""}>${r}</option>`).join("")}</select></div>`+
-         `<button class="primary" id="addCollabBtn">Add collaborator</button>`;
+      h+=`<div class="field" style="margin-top:.6rem"><label for="collabEmail">${esc(t("collab.addLabel"))}</label><input id="collabEmail" placeholder="teammate@company.com"></div>`+
+         `<div class="field" style="margin:.4rem 0"><label for="collabRole">${esc(t("field.role"))}</label><select id="collabRole">${roleOptions("developer")}</select></div>`+
+         `<button class="primary" id="addCollabBtn">${esc(t("collab.addBtn"))}</button>`;
     }
     h+=`</div></div>`;
     panel.innerHTML=h;
@@ -657,13 +1189,13 @@ hr{border:none;height:0;margin:1.1rem 0}
   function reloadTeamTab(){ const p=$("tabpanel"); if(p && state.tab==="team") renderTeamTab(p); }
   async function addCollab(appId){
     const email=$("collabEmail").value.trim(); const role=$("collabRole").value;
-    if(!email){ toast("Enter an email.","err"); return; }
-    try{ await api("POST","/admin/apps/"+encodeURIComponent(appId)+"/collaborators?email="+encodeURIComponent(email)+"&role="+role); toast("Collaborator added.","ok"); reloadTeamTab(); }
-    catch(e){ toast("Add failed: "+e.message,"err"); }
+    if(!email){ toast(t("toast.enterEmail"),"err"); return; }
+    try{ await api("POST","/admin/apps/"+encodeURIComponent(appId)+"/collaborators?email="+encodeURIComponent(email)+"&role="+role); toast(t("toast.collabAdded"),"ok"); reloadTeamTab(); }
+    catch(e){ toast(t("toast.addFailed",{msg:errMsg(e)}),"err"); }
   }
   async function removeCollab(appId,userId){
-    try{ await api("DELETE","/admin/apps/"+encodeURIComponent(appId)+"/collaborators/"+userId); toast("Collaborator removed.","ok"); reloadTeamTab(); }
-    catch(e){ toast("Remove failed: "+e.message,"err"); }
+    try{ await api("DELETE","/admin/apps/"+encodeURIComponent(appId)+"/collaborators/"+userId); toast(t("toast.collabRemoved"),"ok"); reloadTeamTab(); }
+    catch(e){ toast(t("toast.removeFailed",{msg:errMsg(e)}),"err"); }
   }
 
   // ---------- connect ----------
@@ -672,9 +1204,9 @@ hr{border:none;height:0;margin:1.1rem 0}
     state.key=$("key").value.trim();
     localStorage.setItem(LS.base, state.base);
     localStorage.setItem(LS.key, state.key);
-    $("connError").innerHTML="";
-    if(!state.key){ setStatus("err","No API key"); toast("Enter an API key.","err"); return; }
-    setStatus("busy","Connecting…");
+    setConnError(null);
+    if(!state.key){ setStatus("err","conn.noKey"); toast(t("toast.enterKey"),"err"); return; }
+    setStatus("busy","conn.connecting");
     try{
       const orgsRes=await tryApi("GET","/api/v1/organizations");
       if(orgsRes.ok){ state.orgs=(orgsRes.data&&orgsRes.data.organizations)||[]; renderOrgs(); }
@@ -684,32 +1216,39 @@ hr{border:none;height:0;margin:1.1rem 0}
       const meRes=await tryApi("GET","/api/v1/users/me");
       if(meRes.ok) state.me=meRes.data;
       renderTeamOrgs();
-      setStatus("ok","Connected · "+state.apps.length+" app"+(state.apps.length===1?"":"s"));
+      setStatus("ok","conn.connected",{n:state.apps.length});
       showApp();
       if(!state.selected && state.selectedOrg==null) renderOverview();
-      if(!orgsRes.ok){ toast("Apps loaded, but organizations unavailable ("+(orgsRes.status||"?")+").",""); }
+      if(!orgsRes.ok){ toast(t("toast.orgsUnavailable",{status:orgsRes.status||"?"}),""); }
     }catch(e){
-      setStatus("err","Connection failed");
-      $("connError").innerHTML='<div class="err-box">Could not connect: '+esc(e.message)+
-        (e.status?(" (HTTP "+e.status+")"):"")+'. Check the base URL and API key.</div>';
+      setStatus("err","conn.failed");
+      setConnError({message:e.message, status:e.status, network:!!e.network});
     }
+  }
+  // Kept as data so a language switch on the connect screen can redraw it.
+  let lastConnError=null;
+  function setConnError(err){
+    lastConnError=err;
+    $("connError").innerHTML=err
+      ? '<div class="err-box">'+t("conn.error_html",{msg:esc(err.network?t("conn.unreachable"):err.message), http:err.status?(" (HTTP "+esc(err.status)+")"):""})+'</div>'
+      : "";
   }
 
   // ---------- create app ----------
   async function createApp(){
     const orgId=$("orgSelect").value;
     const name=$("newAppName").value.trim();
-    if(!name){ toast("Enter a display name.","err"); return; }
-    const btn=$("createAppBtn"); btn.disabled=true;
+    if(!name){ toast(t("toast.enterName"),"err"); return; }
+    const btn=$("createAppBtn"); btn.disabled=true; creatingApp=true;
     try{
       await api("POST","/api/v1/apps",{json:{organization_id:Number(orgId), display_name:name}});
-      toast("App \""+name+"\" created.","ok");
+      toast(t("toast.appCreated",{name}),"ok");
       $("newAppName").value="";
       const appsData=await api("GET","/api/v1/apps");
       state.apps=(appsData&&appsData.apps)||[];
       renderApps();
-    }catch(e){ toast("Create failed: "+e.message,"err"); }
-    finally{ btn.disabled=false; }
+    }catch(e){ toast(t("toast.createFailed",{msg:errMsg(e)}),"err"); }
+    finally{ creatingApp=false; btn.disabled=false; }
   }
 
   // ---------- app detail ----------
@@ -737,8 +1276,12 @@ hr{border:none;height:0;margin:1.1rem 0}
     const metrics = mRes.ok ? mRes.data : null;
 
     state.appData = {app, appId, releases, channels, metrics, relRes, mRes};
-
-    d.innerHTML = renderAppShell(app);
+    mountAppShell();
+  }
+  // Draws the selected app's header + tabs from the cached appData and opens
+  // the current tab. Also used to redraw in place after a language switch.
+  function mountAppShell(){
+    $("detail").innerHTML = renderAppShell(state.selected);
     document.querySelectorAll('.tab[data-tab]').forEach(b=>{
       b.onclick=()=>selectTab(b.getAttribute("data-tab"));
     });
@@ -749,15 +1292,15 @@ hr{border:none;height:0;margin:1.1rem 0}
   function renderAppShell(app){
     const ad=state.appData;
     let h=`<div class="apphdr"><h1>${esc(app.display_name||app.app_id)}</h1>`+
-      `<button class="pill copy-id" data-copytext="${esc(app.app_id)}" title="Copy app id">${esc(app.app_id)} ⧉</button></div>`;
+      `<button class="pill copy-id" data-copytext="${esc(app.app_id)}" title="${esc(t("app.copyId"))}">${esc(app.app_id)} ⧉</button></div>`;
     const chSummary=ad.channels.length?ad.channels.map(c=>esc(c.name)).join(", "):"stable";
     h+=`<div class="muted" style="font:12.5px/1.4 var(--mono);margin-bottom:.3rem">`+
-       `rel ${esc(app.latest_release_version||"—")} · patch ${app.latest_patch_number==null?"—":esc(app.latest_patch_number)} · ${chSummary}</div>`;
+       t("app.meta_html",{rel:esc(app.latest_release_version||"—"), patch:app.latest_patch_number==null?"—":esc(app.latest_patch_number), channels:chSummary})+`</div>`;
     h+=`<nav class="tabs" role="tablist">`+
-       `<button class="tab" data-tab="overview" role="tab">Overview</button>`+
-       `<button class="tab" data-tab="releases" role="tab">Releases <span class="pill">${ad.releases.length}</span></button>`+
-       `<button class="tab" data-tab="analytics" role="tab">Analytics</button>`+
-       `<button class="tab" data-tab="team" role="tab">Team</button>`+
+       `<button class="tab" data-tab="overview" role="tab">${esc(t("tab.overview"))}</button>`+
+       `<button class="tab" data-tab="releases" role="tab">${esc(t("tab.releases"))} <span class="pill">${ad.releases.length}</span></button>`+
+       `<button class="tab" data-tab="analytics" role="tab">${esc(t("tab.analytics"))}</button>`+
+       `<button class="tab" data-tab="team" role="tab">${esc(t("tab.team"))}</button>`+
        `</nav><div id="tabpanel"></div>`;
     return h;
   }
@@ -779,21 +1322,21 @@ hr{border:none;height:0;margin:1.1rem 0}
     const {app, appId, channels, metrics, mRes, releases} = state.appData;
     let h=`<div class="stats">`;
     if(mRes.ok){
-      h+=`<div class="stat"><span class="n">${num(metrics&&metrics.total_events)}</span><span class="l">Total events</span></div>`+
-         `<div class="stat"><span class="n">${num(metrics&&metrics.unique_clients)}</span><span class="l">Unique clients</span></div>`;
+      h+=`<div class="stat"><span class="n">${num(metrics&&metrics.total_events)}</span><span class="l">${esc(t("ov.totalEvents"))}</span></div>`+
+         `<div class="stat"><span class="n">${num(metrics&&metrics.unique_clients)}</span><span class="l">${esc(t("ov.uniqueClients"))}</span></div>`;
     }
-    h+=`<div class="stat"><span class="n" id="liveCount">—</span><span class="l">Live patches</span></div></div>`;
+    h+=`<div class="stat"><span class="n" id="liveCount">—</span><span class="l">${esc(t("ov.livePatches"))}</span></div></div>`;
     const ebt=(metrics&&metrics.events_by_type)||{};
     const ebtKeys=Object.keys(ebt);
     if(ebtKeys.length){
       h+=`<div class="chips" style="margin-bottom:.8rem">`+
          ebtKeys.map(k=>`<span class="pill">${esc(k)}: ${num(ebt[k])}</span>`).join("")+`</div>`;
     }
-    h+=`<div class="panel"><div class="hd">Live patches</div>`+
-       `<div class="bd" id="liveBox"><div class="empty">Loading…</div></div></div>`;
+    h+=`<div class="panel"><div class="hd">${esc(t("ov.livePatches"))}</div>`+
+       `<div class="bd" id="liveBox"><div class="empty">${esc(t("common.loading"))}</div></div></div>`;
     panel.innerHTML=h;
     const latest = releases.length ? releases[releases.length-1] : null;
-    if(!latest){ $("liveBox").innerHTML=`<div class="empty">No releases yet — release from your app directory.</div>`; $("liveCount").textContent="0"; return; }
+    if(!latest){ $("liveBox").innerHTML=`<div class="empty">${esc(t("ov.noReleases"))}</div>`; $("liveCount").textContent="0"; return; }
     loadLivePatches(appId, latest, channels);
   }
   async function loadLivePatches(appId, release, channels){
@@ -801,12 +1344,12 @@ hr{border:none;height:0;margin:1.1rem 0}
     const res=await tryApi("GET","/api/v1/apps/"+encodeURIComponent(appId)+"/releases/"+encodeURIComponent(release.id)+"/patches");
     if(state.tab!=="overview" || !state.selected || state.selected.app_id!==appId) return;
     const lc=$("liveCount");
-    if(!res.ok){ box.innerHTML=`<div class="empty">Patches unavailable (HTTP ${res.status||"?"}).</div>`; if(lc) lc.textContent="—"; return; }
+    if(!res.ok){ box.innerHTML=`<div class="empty">${esc(t("patch.unavailable",{status:res.status||"?"}))}</div>`; if(lc) lc.textContent="—"; return; }
     const patches=(res.data&&res.data.patches)||[];
     const active=patches.filter(p=>(p.deployments||[]).some(d=>d.status==="active" && !d.rolled_back));
     if(lc) lc.textContent=String(active.length);
-    if(!active.length){ box.innerHTML=`<div class="empty">No patches live on <b>${esc(release.version)}</b>.</div>`; return; }
-    box.innerHTML=`<div class="muted" style="font-size:12px;margin-bottom:.5rem">On latest release <b>${esc(release.version)}</b> — manage older releases under the Releases tab.</div>`+
+    if(!active.length){ box.innerHTML=`<div class="empty">${t("ov.noLive_html",{version:esc(release.version)})}</div>`; return; }
+    box.innerHTML=`<div class="muted" style="font-size:12px;margin-bottom:.5rem">${t("ov.onLatest_html",{version:esc(release.version)})}</div>`+
       patchCardsHtml(active, channels);
     wirePatchCards(box, appId, release.id, ()=>loadLivePatches(appId, release, channels));
   }
@@ -824,8 +1367,8 @@ hr{border:none;height:0;margin:1.1rem 0}
     add("flutter", md.flutter_version_override || env.flutter_revision);
     add("os", env.operating_system_version || env.operating_system);
     add("xcode", env.xcode_version);
-    if(md.release_platform) add("platform", md.release_platform);
-    let h=`<details class="prov" style="margin-top:.4rem"><summary class="muted" style="font-size:12.5px">Build provenance</summary>`;
+    if(md.release_platform) add(esc(t("prov.platform")), md.release_platform);
+    let h=`<details class="prov" style="margin-top:.4rem"><summary class="muted" style="font-size:12.5px">${esc(t("prov.title"))}</summary>`;
     if(bits.length) h+=`<div class="kv" style="margin-top:.35rem">${bits.join("")}</div>`;
     h+=`<pre style="margin:.4rem 0 0;overflow-x:auto;font-size:11.5px">${esc(JSON.stringify(md,null,2))}</pre>`;
     return h+`</details>`;
@@ -834,11 +1377,11 @@ hr{border:none;height:0;margin:1.1rem 0}
   // Releases: full release history with lazily-loaded patches + channels summary.
   function renderReleasesTab(panel){
     const {appId, releases, channels, relRes} = state.appData;
-    let h=`<div class="panel"><div class="hd">Releases <span class="pill">${releases.length}</span></div><div class="bd">`;
+    let h=`<div class="panel"><div class="hd">${esc(t("rel.title"))} <span class="pill">${releases.length}</span></div><div class="bd">`;
     if(!relRes.ok){
-      h+=`<div class="empty">Releases unavailable (HTTP ${relRes.status||"?"}).</div>`;
+      h+=`<div class="empty">${esc(t("rel.unavailable",{status:relRes.status||"?"}))}</div>`;
     } else if(!releases.length){
-      h+=`<div class="empty" style="margin-bottom:.5rem">No releases yet — publish one from your app directory:</div>`+
+      h+=`<div class="empty" style="margin-bottom:.5rem">${esc(t("rel.none"))}</div>`+
          codeBlock("shorebird release android");
     } else {
       const rs=[...releases].reverse(); // newest first
@@ -846,26 +1389,26 @@ hr{border:none;height:0;margin:1.1rem 0}
         const ps=r.platform_statuses||{};
         const pchips=Object.keys(ps).length
           ? Object.keys(ps).map(pl=>`<span class="chips" style="display:inline-flex">${esc(pl)}&nbsp;${statusPill(ps[pl])}</span>`).join("&nbsp;&nbsp;")
-          : '<span class="muted">no platform status</span>';
+          : `<span class="muted">${esc(t("rel.noPlatformStatus"))}</span>`;
         h+=`<details data-release="${esc(r.id)}"><summary>`+
            `<b>${esc(r.version)}</b>`+
            (r.flutter_version?` <span class="pill">Flutter ${esc(r.flutter_version)}</span>`:"")+
            ` &nbsp; ${pchips}</summary>`+
            `<div class="inner">`+
-           (r.flutter_revision?`<div class="kv"><span>Flutter rev: <code>${esc(String(r.flutter_revision).slice(0,12))}</code></span>`+
-             (r.created_at?`<span title="${esc(String(r.created_at))}">Created ${esc(relTime(r.created_at))}</span>`:"")+`</div>`:"")+
+           (r.flutter_revision?`<div class="kv"><span>${esc(t("rel.flutterRev"))} <code>${esc(String(r.flutter_revision).slice(0,12))}</code></span>`+
+             (r.created_at?`<span title="${esc(String(r.created_at))}">${esc(t("rel.created",{when:relTime(r.created_at)}))}</span>`:"")+`</div>`:"")+
            (r.notes?`<div class="muted" style="font-size:12.5px;margin-top:.35rem">${esc(r.notes)}</div>`:"")+
            provenanceHtml(r.metadata)+
-           `<div class="patches" data-release="${esc(r.id)}"><div class="empty">Expand to load patches…</div></div>`+
+           `<div class="patches" data-release="${esc(r.id)}"><div class="empty">${esc(t("rel.expand"))}</div></div>`+
            `</div></details>`;
       });
     }
     h+=`</div></div>`;
-    h+=`<div class="section"><div class="panel"><div class="hd">Channels</div><div class="bd">`;
+    h+=`<div class="section"><div class="panel"><div class="hd">${esc(t("ch.title"))}</div><div class="bd">`;
     if(channels.length){
       h+=`<div class="chips">`+channels.map(c=>`<span class="pill">${esc(c.name)} <span class="muted">#${esc(c.id)}</span></span>`).join("")+`</div>`;
     } else {
-      h+=`<div class="empty">No channels (rollout defaults to <code>stable</code>).</div>`;
+      h+=`<div class="empty">${t("ch.none_html")}</div>`;
     }
     h+=`</div></div></div>`;
     panel.innerHTML=h;
@@ -881,7 +1424,7 @@ hr{border:none;height:0;margin:1.1rem 0}
 
   // Analytics: the chart grid, loaded lazily the first time the tab opens.
   function renderAnalyticsTab(panel){
-    panel.innerHTML=`<div class="ana-grid" id="anaGrid"><div class="empty">Loading analytics…</div></div>`;
+    panel.innerHTML=`<div class="ana-grid" id="anaGrid"><div class="empty">${esc(t("ana.loading"))}</div></div>`;
     loadAnalytics(state.appData.appId, $("anaGrid"));
   }
 
@@ -893,7 +1436,7 @@ hr{border:none;height:0;margin:1.1rem 0}
 
   function statusPill(s){
     const cls = s==="active"?"active":(s==="draft"?"draft":"");
-    return `<span class="pill ${cls}">${esc(s)}</span>`;
+    return `<span class="pill ${cls}">${esc(statusLabel(s))}</span>`;
   }
 
   function rolloutBar(pct){
@@ -906,10 +1449,11 @@ hr{border:none;height:0;margin:1.1rem 0}
     return new Promise(resolve=>{
       const bd=document.createElement("div");
       bd.className="modal-backdrop";
-      bd.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="${esc(opts.title||"Confirm")}">`+
-        `<h3>${esc(opts.title||"Confirm")}</h3><p>${opts.body||""}</p>`+
-        `<div class="actions"><button class="cancel">Cancel</button>`+
-        `<button class="${opts.danger?"danger":"primary"} ok">${esc(opts.confirm||"Confirm")}</button></div></div>`;
+      const title=opts.title||t("common.confirm");
+      bd.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}">`+
+        `<h3>${esc(title)}</h3><p>${opts.body||""}</p>`+
+        `<div class="actions"><button class="cancel">${esc(t("common.cancel"))}</button>`+
+        `<button class="${opts.danger?"danger":"primary"} ok">${esc(opts.confirm||t("common.confirm"))}</button></div></div>`;
       document.body.appendChild(bd);
       const prevFocus=document.activeElement;
       const cancel=bd.querySelector(".cancel"), ok=bd.querySelector(".ok");
@@ -937,15 +1481,15 @@ hr{border:none;height:0;margin:1.1rem 0}
   async function loadPatches(appId, releaseId, channels){
     const box=document.querySelector('.patches[data-release="'+CSS.escape(releaseId)+'"]');
     if(!box) return;
-    box.innerHTML='<div class="empty">Loading patches…</div>';
+    box.innerHTML=`<div class="empty">${esc(t("patch.loading"))}</div>`;
     const res=await tryApi("GET","/api/v1/apps/"+encodeURIComponent(appId)+"/releases/"+encodeURIComponent(releaseId)+"/patches");
     if(!res.ok){
-      if(res.status===404){ box.innerHTML='<div class="empty">No patches for this release.</div>'; }
-      else { box.innerHTML='<div class="err-box">Patches unavailable (HTTP '+(res.status||"?")+').</div>'; }
+      if(res.status===404){ box.innerHTML=`<div class="empty">${esc(t("patch.none"))}</div>`; }
+      else { box.innerHTML=`<div class="err-box">${esc(t("patch.unavailable",{status:res.status||"?"}))}</div>`; }
       return;
     }
     const patches=(res.data&&res.data.patches)||[];
-    if(!patches.length){ box.innerHTML='<div class="empty">No patches for this release.</div>'; return; }
+    if(!patches.length){ box.innerHTML=`<div class="empty">${esc(t("patch.none"))}</div>`; return; }
     box.innerHTML=patchCardsHtml(patches, channels);
     wirePatchCards(box, appId, releaseId, ()=>loadPatches(appId, releaseId, channels));
   }
@@ -963,11 +1507,11 @@ hr{border:none;height:0;margin:1.1rem 0}
       const curPct=active?active.rollout:100;
       // headline state pill
       let state;
-      if(rolledBack) state=`<span class="pill draft">rolled back</span>`;
-      else if(active) state=`<span class="pill active">live · ${esc(active.channel)} · ${active.rollout}%</span>`;
-      else if(deploys.length) state=`<span class="pill">withdrawn</span>`;
+      if(rolledBack) state=`<span class="pill draft">${esc(t("patch.rolledBack"))}</span>`;
+      else if(active) state=`<span class="pill active">${t("patch.live_html",{channel:esc(active.channel), pct:esc(active.rollout)})}</span>`;
+      else if(deploys.length) state=`<span class="pill">${esc(t("patch.withdrawn"))}</span>`;
       else state=statusPill(p.status||"ready");
-      h+=`<div class="card"><div class="title">Patch #${esc(p.number)} ${state}</div>`;
+      h+=`<div class="card"><div class="title">${t("patch.title_html",{n:esc(p.number)})} ${state}</div>`;
       // breakdown — what this patch actually is: built artifacts, size, build status, notes
       const arts=p.artifacts||[];
       const totalSize=arts.reduce((s,a)=>s+(Number(a.size)||0),0);
@@ -979,9 +1523,9 @@ hr{border:none;height:0;margin:1.1rem 0}
       const plats=[...new Set(arts.map(a=>a.platform).filter(Boolean))].sort();
       h+=`<div class="kv" style="margin-top:.2rem">`+
          (plats.length?`<span>${plats.map(esc).join(" + ")}</span>`:"")+
-         `<span>${arts.length} artifact${arts.length===1?"":"s"}</span>`+
+         `<span>${esc(t("patch.artifacts",{n:arts.length}))}</span>`+
          (totalSize?`<span>${esc(fmtBytes(totalSize))}</span>`:"")+
-         (p.status?`<span>build: <b>${esc(p.status)}</b></span>`:"")+`</div>`;
+         (p.status?`<span>${t("patch.build_html",{status:esc(statusLabel(p.status))})}</span>`:"")+`</div>`;
       if(arts.length){
         h+=`<div class="chips" style="margin-top:.5rem">`+
            arts.map(a=>{
@@ -994,14 +1538,14 @@ hr{border:none;height:0;margin:1.1rem 0}
       // Notes: shown when set, and always editable inline. Freeform "why did
       // this patch ship" text — the field the CLI's `patches info` prints.
       h+=`<div class="notes" data-patch="${esc(pid)}" style="margin-top:.5rem">`+
-         `<input type="text" class="nt" maxlength="4096" placeholder="Add notes — why this patch shipped" value="${esc(p.notes||"")}" style="flex:1;min-width:12rem">`+
-         `<button class="sm act-notes">Save notes</button>`+
+         `<input type="text" class="nt" maxlength="4096" placeholder="${esc(t("patch.notesPh"))}" value="${esc(p.notes||"")}" style="flex:1;min-width:12rem">`+
+         `<button class="sm act-notes">${esc(t("patch.saveNotes"))}</button>`+
          `</div>`;
       // per-channel deployment rows with rollout bars
       if(deploys.length){
         h+=`<div class="deploys">`;
         deploys.forEach(d=>{
-          const label=d.rolled_back?"rolled back":d.status;
+          const label=d.rolled_back?t("patch.rolledBack"):statusLabel(d.status);
           const cls=d.rolled_back?"draft":(d.status==="active"?"active":"");
           h+=`<div class="deploy"><span class="dch">${esc(d.channel)}</span>`+
              `<span class="pill ${cls}">${esc(label)}</span>`+rolloutBar(d.rollout)+`</div>`;
@@ -1010,14 +1554,14 @@ hr{border:none;height:0;margin:1.1rem 0}
       }
       // rollout control (slider pre-set to the current active rollout)
       h+=`<div class="rollout" data-patch="${esc(pid)}">`+
-         `<label style="margin:0">Channel</label><select class="ch">${opts}</select>`+
+         `<label style="margin:0">${esc(t("patch.channel"))}</label><select class="ch">${opts}</select>`+
          `<input type="range" class="rg" min="0" max="100" value="${curPct}">`+
          `<input type="number" class="pct" min="0" max="100" value="${curPct}"> %`+
-         `<button class="sm primary act-rollout">Set rollout</button>`+
+         `<button class="sm primary act-rollout">${esc(t("patch.setRollout"))}</button>`+
          `</div>`;
       h+=`<div class="row" style="margin-top:.5rem">`+
-         `<button class="sm danger act-withdraw" data-rollback="false">Withdraw</button>`+
-         `<button class="sm danger act-withdraw" data-rollback="true">Withdraw + rollback</button>`+
+         `<button class="sm danger act-withdraw" data-rollback="false">${esc(t("patch.withdraw"))}</button>`+
+         `<button class="sm danger act-withdraw" data-rollback="true">${esc(t("patch.withdrawRollback"))}</button>`+
          `</div>`;
       h+=`</div>`;
     });
@@ -1065,31 +1609,29 @@ hr{border:none;height:0;margin:1.1rem 0}
   // saves as cleared rather than being rejected client-side.
   async function doSetPatchNotes(appId, patchId, notes, reload){
     const res=await tryApi("PATCH","/api/v1/apps/"+encodeURIComponent(appId)+"/patches/"+encodeURIComponent(patchId),{json:{notes:String(notes==null?"":notes)}});
-    if(res.ok){ toast(String(notes).trim()?"Notes saved.":"Notes cleared.","ok"); if(reload) reload(); }
-    else toast("Saving notes failed: "+(res.error?res.error.message:res.status),"err");
+    if(res.ok){ toast(t(String(notes).trim()?"toast.notesSaved":"toast.notesCleared"),"ok"); if(reload) reload(); }
+    else toast(t("toast.notesFailed",{msg:res.error?errMsg(res.error):res.status}),"err");
   }
 
   async function doRollout(appId, patchId, channel, percent, reload){
     const q="?channel="+encodeURIComponent(channel)+"&percent="+encodeURIComponent(percent);
     const res=await tryApi("POST","/admin/apps/"+encodeURIComponent(appId)+"/patches/"+encodeURIComponent(patchId)+"/rollout"+q);
-    if(res.ok){ toast("Rollout set to "+percent+"% on "+channel+".","ok"); if(reload) reload(); }
-    else toast("Rollout failed: "+(res.error?res.error.message:res.status),"err");
+    if(res.ok){ toast(t("toast.rolloutSet",{pct:percent, channel}),"ok"); if(reload) reload(); }
+    else toast(t("toast.rolloutFailed",{msg:res.error?errMsg(res.error):res.status}),"err");
   }
 
   async function doWithdraw(appId, patchId, channel, rollback, reload){
     const ok=await confirmModal({
-      title: rollback?"Withdraw + roll back?":"Withdraw patch?",
-      body: rollback
-        ? `Withdraws the patch <b>and rolls back live devices</b> on <b>${esc(channel)}</b>. Installed apps revert to the release code on next launch.`
-        : `Stops serving this patch to new checks on <b>${esc(channel)}</b>. Devices that already installed it keep running it.`,
-      confirm: rollback?"Withdraw + rollback":"Withdraw",
+      title: t(rollback?"wd.titleRollback":"wd.title"),
+      body: t(rollback?"wd.bodyRollback_html":"wd.body_html",{channel:esc(channel)}),
+      confirm: t(rollback?"patch.withdrawRollback":"patch.withdraw"),
       danger:true,
     });
     if(!ok) return;
     const q="?channel="+encodeURIComponent(channel)+"&rollback="+(rollback?"true":"false");
     const res=await tryApi("POST","/admin/apps/"+encodeURIComponent(appId)+"/patches/"+encodeURIComponent(patchId)+"/withdraw"+q);
-    if(res.ok){ toast("Patch withdrawn"+(rollback?" with rollback":"")+" on "+channel+".","ok"); if(reload) reload(); }
-    else toast("Withdraw failed: "+(res.error?res.error.message:res.status),"err");
+    if(res.ok){ toast(t(rollback?"toast.withdrawnRollback":"toast.withdrawn",{channel}),"ok"); if(reload) reload(); }
+    else toast(t("toast.withdrawFailed",{msg:res.error?errMsg(res.error):res.status}),"err");
   }
 
   // ---------- analytics helpers ----------
@@ -1107,7 +1649,7 @@ hr{border:none;height:0;margin:1.1rem 0}
   function lineChart(datasets, opts){
     opts=opts||{};
     const clean=(datasets||[]).filter(d=>d.values && d.values.length);
-    if(!clean.length) return '<div class="empty">No data.</div>';
+    if(!clean.length) return `<div class="empty">${esc(t("chart.noData"))}</div>`;
     const n=Math.max.apply(null, clean.map(d=>d.values.length));
     const W=Math.max(320, n*40+64), H=200, padL=46, padR=12, padT=12, padB=32;
     const plotW=W-padL-padR, plotH=H-padT-padB;
@@ -1153,7 +1695,7 @@ hr{border:none;height:0;margin:1.1rem 0}
   // Horizontal bar chart. rows: [{label, value, pct}] (pct 0..1 optional).
   function hbarChart(rows, opts){
     opts=opts||{};
-    if(!rows||!rows.length) return '<div class="empty">No data.</div>';
+    if(!rows||!rows.length) return `<div class="empty">${esc(t("chart.noData"))}</div>`;
     const rowH=26, padT=6, padB=6, labelW=118, W=560;
     const H=padT+padB+rows.length*rowH;
     const barMax=W-labelW-72;
@@ -1172,10 +1714,10 @@ hr{border:none;height:0;margin:1.1rem 0}
 
   // 7x24 sequential heatmap. cells: [{day_of_week_utc(1-7,1=Sun),hour_utc,average_active_devices}].
   function heatmapGrid(cells, busiestDow, busiestHour){
-    if(!cells||!cells.length) return '<div class="empty">No data.</div>';
-    const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    if(!cells||!cells.length) return `<div class="empty">${esc(t("chart.noData"))}</div>`;
+    const days=t("chart.days");
     let max=0; cells.forEach(c=>max=Math.max(max, Number(c.average_active_devices)||0));
-    if(max<=0) return '<div class="empty">No activity data.</div>';
+    if(max<=0) return `<div class="empty">${esc(t("chart.noActivity"))}</div>`;
     const grid={};
     cells.forEach(c=>{ (grid[c.day_of_week_utc]=grid[c.day_of_week_utc]||{})[c.hour_utc]=Number(c.average_active_devices)||0; });
     const cell=16, gap=2, labelW=34, topH=16;
@@ -1192,7 +1734,7 @@ hr{border:none;height:0;margin:1.1rem 0}
         const x=labelW+hr*(cell+gap);
         const op=0.06+0.94*(v/max);
         const busy=(busiestDow===d && busiestHour===hr);
-        h+=`<rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="2" fill="var(--accent)" fill-opacity="${op.toFixed(3)}" stroke="${busy?'var(--text)':'var(--border)'}" stroke-width="${busy?1.5:0.5}"><title>${days[d-1]} ${pad2(hr)}:00 UTC — ${v.toFixed(2)} avg devices</title></rect>`;
+        h+=`<rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="2" fill="var(--accent)" fill-opacity="${op.toFixed(3)}" stroke="${busy?'var(--text)':'var(--border)'}" stroke-width="${busy?1.5:0.5}"><title>${esc(t("chart.heatTip",{day:days[d-1], hh:pad2(hr), v:v.toFixed(2)}))}</title></rect>`;
       }
     }
     return `<div class="scroll"><svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;height:auto" role="img">${h}</svg></div>`;
@@ -1200,7 +1742,7 @@ hr{border:none;height:0;margin:1.1rem 0}
 
   // 24-bar hour-of-day chart with recommended-window / busiest-hour highlights.
   function activeHoursChart(hourly, recStart, recLen, busiest){
-    if(!hourly||!hourly.length) return '<div class="empty">No data.</div>';
+    if(!hourly||!hourly.length) return `<div class="empty">${esc(t("chart.noData"))}</div>`;
     const W=Math.max(360, 24*22+50), H=200, padL=44, padR=10, padT=12, padB=28;
     const plotW=W-padL-padR, plotH=H-padT-padB;
     let max=0; hourly.forEach(x=>max=Math.max(max, Number(x.average_active_devices)||0)); if(max<=0) max=1;
@@ -1219,26 +1761,26 @@ hr{border:none;height:0;margin:1.1rem 0}
       const hh=plotH*(v/max), x=padL+hr*bw, y=padT+plotH-hh;
       const isRec=recSet[hr]===1, isBusy=(busiest===hr);
       const color=isBusy?"var(--warn)":(isRec?"var(--ok)":"var(--bar2)");
-      bars+=`<rect x="${(x+2).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw-4).toFixed(1)}" height="${hh.toFixed(1)}" rx="2" fill="${color}"><title>${pad2(hr)}:00 UTC — ${v.toFixed(2)} avg${isRec?" · recommended release window":""}${isBusy?" · busiest hour":""}</title></rect>`;
+      bars+=`<rect x="${(x+2).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw-4).toFixed(1)}" height="${hh.toFixed(1)}" rx="2" fill="${color}"><title>${esc(t("chart.hourTip",{hh:pad2(hr), v:v.toFixed(2)})+(isRec?t("chart.hourTipRec"):"")+(isBusy?t("chart.hourTipBusy"):""))}</title></rect>`;
       if(hr%3===0) labels+=`<text x="${(x+bw/2).toFixed(1)}" y="${H-padB+15}" text-anchor="middle">${hr}</text>`;
     }
-    const leg=`<div class="legend"><span><i class="swatch" style="background:var(--ok)"></i>Recommended window</span><span><i class="swatch" style="background:var(--warn)"></i>Busiest hour</span></div>`;
+    const leg=`<div class="legend"><span><i class="swatch" style="background:var(--ok)"></i>${esc(t("chart.recWindow"))}</span><span><i class="swatch" style="background:var(--warn)"></i>${esc(t("chart.busiest"))}</span></div>`;
     return leg+`<div class="scroll"><svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;height:auto" role="img">${axis}${bars}${labels}</svg></div>`;
   }
 
   // current vs previous stat comparison (previous may be null).
   function statCompare(cur, prev, curLabel, prevLabel){
     let h=`<div class="stats">`;
-    h+=`<div class="stat"><span class="n">${num(cur)}</span><span class="l">${esc(curLabel||"Current")}</span></div>`;
+    h+=`<div class="stat"><span class="n">${num(cur)}</span><span class="l">${esc(curLabel||t("stat.current"))}</span></div>`;
     if(prev==null){
-      h+=`<div class="stat"><span class="n">—</span><span class="l">${esc(prevLabel||"Previous")}</span></div>`;
+      h+=`<div class="stat"><span class="n">—</span><span class="l">${esc(prevLabel||t("stat.previous"))}</span></div>`;
     } else {
-      h+=`<div class="stat"><span class="n">${num(prev)}</span><span class="l">${esc(prevLabel||"Previous")}</span></div>`;
+      h+=`<div class="stat"><span class="n">${num(prev)}</span><span class="l">${esc(prevLabel||t("stat.previous"))}</span></div>`;
       const c=Number(cur)||0, p=Number(prev)||0;
       let txt, col;
       if(p===0){ txt=c>0?("+"+num(c)):"—"; col=c>0?"var(--ok)":"var(--muted)"; }
       else { const dd=(c-p)/p*100; txt=(dd>=0?"+":"")+dd.toFixed(1)+"%"; col=dd>=0?"var(--ok)":"var(--danger)"; }
-      h+=`<div class="stat"><span class="n" style="color:${col}">${esc(txt)}</span><span class="l">Change</span></div>`;
+      h+=`<div class="stat"><span class="n" style="color:${col}">${esc(txt)}</span><span class="l">${esc(t("stat.change"))}</span></div>`;
     }
     h+=`</div>`;
     return h;
@@ -1250,10 +1792,10 @@ hr{border:none;height:0;margin:1.1rem 0}
   }
   function anaNoData(res){
     if(res && !res.ok){
-      if(res.status===404) return '<div class="empty">Not available.</div>';
-      return '<div class="empty">Unavailable (HTTP '+((res&&res.status)||"?")+').</div>';
+      if(res.status===404) return `<div class="empty">${esc(t("ana.notAvailable"))}</div>`;
+      return `<div class="empty">${esc(t("ana.unavailable",{status:(res&&res.status)||"?"}))}</div>`;
     }
-    return '<div class="empty">No data.</div>';
+    return `<div class="empty">${esc(t("chart.noData"))}</div>`;
   }
 
   async function loadAnalytics(appId, wrap){
@@ -1272,14 +1814,14 @@ hr{border:none;height:0;margin:1.1rem 0}
     // App/tab may have changed while awaiting.
     if(state.tab!=="analytics" || !state.selected || state.selected.app_id!==appId) return;
     let h="";
-    h+=anaCard("Patch adoption", renderAdoption(adopt));
-    h+=anaCard("Unique users (30d)", renderUniqueUsers(uu));
-    h+=anaCard("Version distribution (30d active)", renderVersionDist(vd));
-    h+=anaCard("Activity heatmap (28d, UTC)", renderHeatmap(heat));
-    h+=anaCard("Active hours (28d, UTC)", renderActiveHours(ah));
-    h+=anaCard("New devices (30d)", renderNewDevices(nd));
-    h+=anaCard("Patch installs (30d)", renderPatchMetric(inst,"installs"));
-    h+=anaCard("Patch downloads (30d)", renderPatchMetric(dl,"downloads"));
+    h+=anaCard(t("ana.adoption"), renderAdoption(adopt));
+    h+=anaCard(t("ana.uniqueUsers"), renderUniqueUsers(uu));
+    h+=anaCard(t("ana.versionDist"), renderVersionDist(vd));
+    h+=anaCard(t("ana.heatmap"), renderHeatmap(heat));
+    h+=anaCard(t("ana.activeHours"), renderActiveHours(ah));
+    h+=anaCard(t("ana.newDevices"), renderNewDevices(nd));
+    h+=anaCard(t("ana.installs"), renderPatchMetric(inst,"installs"));
+    h+=anaCard(t("ana.downloads"), renderPatchMetric(dl,"downloads"));
     wrap.innerHTML=h;
   }
 
@@ -1294,14 +1836,14 @@ hr{border:none;height:0;margin:1.1rem 0}
       const series=(p.series||[]).filter(s=>s.period!=null);
       if(!series.length) return;
       datasets.push({
-        label:"Patch #"+p.patch_number,
+        label:t("ana.patchSeries",{n:p.patch_number}),
         color:CAT[i%CAT.length],
         values:series.map(s=>({label:s.period, value:(Number(s.adoption_pct)||0)*100})),
       });
     });
-    if(!datasets.length) return '<div class="empty">No adoption data.</div>';
-    const head=`<div class="kv" style="margin-bottom:.5rem"><span>Release: <b>${esc(d.release_version||"—")}</b></span>`+
-      (d.is_latest?`<span class="pill active">latest</span>`:"")+`</div>`;
+    if(!datasets.length) return `<div class="empty">${esc(t("ana.noAdoption"))}</div>`;
+    const head=`<div class="kv" style="margin-bottom:.5rem"><span>${t("ana.release_html",{v:esc(d.release_version||"—")})}</span>`+
+      (d.is_latest?`<span class="pill active">${esc(t("ana.latest"))}</span>`:"")+`</div>`;
     return head+lineChart(datasets,{area:datasets.length===1, max:100, fmtY:v=>Math.round(v)+"%"});
   }
 
@@ -1313,9 +1855,9 @@ hr{border:none;height:0;margin:1.1rem 0}
     const prev=d.previous; // may be null
     const ts=cur.time_series||[];
     if(!ts.length && !(cur.unique_users) && prev==null) return anaNoData(res);
-    let h=statCompare(cur.unique_users, prev?prev.unique_users:null, "This window", "Prev window");
+    let h=statCompare(cur.unique_users, prev?prev.unique_users:null, t("ana.thisWindow"), t("ana.prevWindow"));
     if(ts.length){
-      h+=lineChart([{label:"Unique users", color:"var(--bar1)",
+      h+=lineChart([{label:t("ana.uniqueUsersSeries"), color:"var(--bar1)",
         values:ts.map(p=>({label:p.period, value:p.unique_users}))}], {area:true});
     }
     return h;
@@ -1326,10 +1868,10 @@ hr{border:none;height:0;margin:1.1rem 0}
     if(!res.ok) return anaNoData(res);
     const d=res.data||{};
     const entries=d.entries||[];
-    if(!entries.length) return '<div class="empty">No active devices in window.</div>';
-    const rows=entries.map(e=>({label:e.release_version||"(unknown)", value:e.device_count, pct:e.percentage}));
-    const stats=`<div class="stats"><div class="stat"><span class="n">${num(d.total_devices)}</span><span class="l">Total devices</span></div>`+
-      `<div class="stat"><span class="n">${entries.length}</span><span class="l">Versions</span></div></div>`;
+    if(!entries.length) return `<div class="empty">${esc(t("ana.noActiveDevices"))}</div>`;
+    const rows=entries.map(e=>({label:e.release_version||t("ana.unknownVersion"), value:e.device_count, pct:e.percentage}));
+    const stats=`<div class="stats"><div class="stat"><span class="n">${num(d.total_devices)}</span><span class="l">${esc(t("ana.totalDevices"))}</span></div>`+
+      `<div class="stat"><span class="n">${entries.length}</span><span class="l">${esc(t("ana.versions"))}</span></div></div>`;
     return stats+hbarChart(rows, {color:"var(--bar1)"});
   }
 
@@ -1338,7 +1880,7 @@ hr{border:none;height:0;margin:1.1rem 0}
     if(!res.ok) return anaNoData(res);
     const d=res.data||{};
     const cells=d.cells||[];
-    if(!cells.length) return '<div class="empty">No data.</div>';
+    if(!cells.length) return `<div class="empty">${esc(t("chart.noData"))}</div>`;
     return heatmapGrid(cells, d.busiest_day_of_week_utc, d.busiest_hour_utc);
   }
 
@@ -1347,12 +1889,12 @@ hr{border:none;height:0;margin:1.1rem 0}
     if(!res.ok) return anaNoData(res);
     const d=res.data||{};
     const hourly=d.hourly||[];
-    if(!hourly.length || !hourly.some(x=>(Number(x.average_active_devices)||0)>0)) return '<div class="empty">No activity data.</div>';
+    if(!hourly.length || !hourly.some(x=>(Number(x.average_active_devices)||0)>0)) return `<div class="empty">${esc(t("chart.noActivity"))}</div>`;
     let note="";
     if(d.recommended_window_start_utc!=null){
       const s=d.recommended_window_start_utc, len=d.recommended_window_length_hours||2, e=(s+len)%24;
-      note=`<div class="kv" style="margin-bottom:.4rem"><span>Recommended release window: <b>${pad2(s)}:00–${pad2(e)}:00 UTC</b></span>`+
-        (d.busiest_hour_utc!=null?`<span>Busiest hour: <b>${pad2(d.busiest_hour_utc)}:00 UTC</b></span>`:"")+`</div>`;
+      note=`<div class="kv" style="margin-bottom:.4rem"><span>${t("ana.recWindow_html",{s:pad2(s), e:pad2(e)})}</span>`+
+        (d.busiest_hour_utc!=null?`<span>${t("ana.busiest_html",{h:pad2(d.busiest_hour_utc)})}</span>`:"")+`</div>`;
     }
     return note+activeHoursChart(hourly, d.recommended_window_start_utc, d.recommended_window_length_hours, d.busiest_hour_utc);
   }
@@ -1362,8 +1904,8 @@ hr{border:none;height:0;margin:1.1rem 0}
     if(!res.ok) return anaNoData(res);
     const d=res.data||{};
     if(d.current==null && d.previous==null) return anaNoData(res);
-    return statCompare(d.current, d.previous==null?null:d.previous, "New (30d)", "Prev 30d")+
-      `<div class="muted" style="font-size:12px;margin-top:.4rem">Devices first seen in the window (totals only — no time series provided by this endpoint).</div>`;
+    return statCompare(d.current, d.previous==null?null:d.previous, t("ana.new30"), t("ana.prev30"))+
+      `<div class="muted" style="font-size:12px;margin-top:.4rem">${esc(t("ana.newDevicesNote"))}</div>`;
   }
 
   // GetPatchMetricResponse: {as_of,granularity,current:{count,range,time_series:[{period,count}]},previous:{count,range}|null}
@@ -1375,9 +1917,9 @@ hr{border:none;height:0;margin:1.1rem 0}
     const ts=cur.time_series||[];
     const hasData=(cur.count||0)>0 || ts.some(p=>(p.count||0)>0) || (prev && prev.count);
     if(!hasData) return anaNoData(res);
-    let h=statCompare(cur.count, prev?prev.count:null, "This window", "Prev window");
+    let h=statCompare(cur.count, prev?prev.count:null, t("ana.thisWindow"), t("ana.prevWindow"));
     if(ts.length){
-      h+=lineChart([{label:kind, color:kind==="downloads"?"var(--bar2)":"var(--bar1)",
+      h+=lineChart([{label:t("ana.series."+kind), color:kind==="downloads"?"var(--bar2)":"var(--bar1)",
         values:ts.map(p=>({label:p.period, value:p.count}))}], {area:true});
     }
     return h;
@@ -1393,14 +1935,14 @@ hr{border:none;height:0;margin:1.1rem 0}
   function disconnect(){
     state.key=""; localStorage.removeItem(LS.key); $("key").value="";
     state.apps=[]; state.orgs=[]; state.selected=null; state.selectedOrg=null; state.me=null;
-    setStatus("","Not connected"); showGate();
+    setStatus("","conn.notConnected"); showGate();
   }
-  function copyText(t){
-    try{ if(navigator.clipboard) navigator.clipboard.writeText(t); toast("Copied to clipboard.","ok"); }
-    catch(e){ toast("Copy failed.","err"); }
+  function copyText(text){
+    try{ if(navigator.clipboard) navigator.clipboard.writeText(text); toast(t("toast.copied"),"ok"); }
+    catch(e){ toast(t("toast.copyFailed"),"err"); }
   }
   function codeBlock(text){
-    return `<div class="codeblock"><button class="copybtn" data-copytext="${esc(text)}">Copy</button>${esc(text)}</div>`;
+    return `<div class="codeblock"><button class="copybtn" data-copytext="${esc(text)}">${esc(t("common.copy"))}</button>${esc(text)}</div>`;
   }
   function skeletonDetail(){
     const bar=(w)=>`<div class="skeleton" style="width:${w}"></div>`;
@@ -1412,29 +1954,29 @@ hr{border:none;height:0;margin:1.1rem 0}
     const url=state.base||location.origin;
     const noApps=state.apps.length===0;
     const cmds=`export SHOREBIRD_HOSTED_URL=${url}\n`+
-      `export SHOREBIRD_TOKEN=<your api key>\n`+
+      `export SHOREBIRD_TOKEN=${t("qs.apiKey")}\n`+
       `shorebird init\n`+
-      `# then set  base_url: ${url}  in shorebird.yaml\n`+
+      `${t("qs.setBaseUrl",{url})}\n`+
       `shorebird release android\n`+
       `shorebird patch android`;
+    const title=noApps
+      ? esc(t("hero.firstPatch"))
+      : (state.me&&state.me.email ? t("hero.welcomeEmail_html",{email:esc(state.me.email)}) : esc(t("hero.welcome")));
     d.innerHTML=`<div class="hero"><span class="logo" aria-hidden="true">🐦</span>`+
-      `<h1>${noApps?"Let’s ship your first patch":("Welcome"+(state.me&&state.me.email?", "+esc(state.me.email):""))}</h1>`+
-      `<div>${noApps
-        ?"No apps yet. Point the Shorebird CLI at this server and release — your app appears here automatically."
-        :"Select an app for releases, patches, rollouts, and analytics — or manage your team from the sidebar."}</div>`+
+      `<h1>${title}</h1>`+
+      `<div>${esc(t(noApps?"hero.noApps":"hero.hasApps"))}</div>`+
       `<div class="ovstats">`+
-      `<div class="stat"><span class="n">${state.apps.length}</span><span class="l">Apps</span></div>`+
-      `<div class="stat"><span class="n">${state.orgs.length}</span><span class="l">Organizations</span></div>`+
+      `<div class="stat"><span class="n">${state.apps.length}</span><span class="l">${esc(t("hero.apps"))}</span></div>`+
+      `<div class="stat"><span class="n">${state.orgs.length}</span><span class="l">${esc(t("hero.orgs"))}</span></div>`+
       `</div></div>`+
-      `<div class="qs"><h3>Quick start</h3>`+
-      `<p>From your Flutter app directory. Use a <b>device-reachable</b> URL (your LAN IP or domain) for `+
-      `<code>base_url</code> so devices can reach this server.</p>`+
+      `<div class="qs"><h3>${esc(t("qs.title"))}</h3>`+
+      `<p>${t("qs.body_html")}</p>`+
       codeBlock(cmds)+`</div>`;
   }
 
   // ---------- theme ----------
-  function applyTheme(t){
-    if(t==="light"||t==="dark"){ document.documentElement.setAttribute("data-theme",t); }
+  function applyTheme(mode){
+    if(mode==="light"||mode==="dark"){ document.documentElement.setAttribute("data-theme",mode); }
     else { document.documentElement.removeAttribute("data-theme"); }
   }
   function toggleTheme(){
@@ -1442,17 +1984,61 @@ hr{border:none;height:0;margin:1.1rem 0}
     const next=cur==="auto"?"light":(cur==="light"?"dark":"auto");
     localStorage.setItem(LS.theme,next);
     applyTheme(next);
-    toast("Theme: "+next,"");
+    toast(t("theme.toast",{mode:t("theme."+next)}),"");
   }
+
+  // ---------- language ----------
+  // Re-runs `draw` (which rebuilds #detail) while carrying over what the user
+  // typed and any result boxes — e.g. a newly issued API key that is shown
+  // only once must not vanish because the language was switched.
+  function redrawKeepingInput(draw){
+    const d=$("detail");
+    const vals={}, outs={};
+    d.querySelectorAll("input[id],select[id]").forEach(e=>{ vals[e.id]=e.value; });
+    d.querySelectorAll('[id$="Out"]').forEach(e=>{ outs[e.id]=e.innerHTML; });
+    const open=[...d.querySelectorAll("details[data-release][open]")].map(e=>e.dataset.release);
+    draw();
+    Object.keys(vals).forEach(id=>{ const e=$(id); if(e && d.contains(e)) e.value=vals[id]; });
+    Object.keys(outs).forEach(id=>{ const e=$(id); if(e && d.contains(e)) e.innerHTML=outs[id]; });
+    // Re-opening fires each release's toggle handler, which reloads its patches.
+    d.querySelectorAll("details[data-release]").forEach(e=>{ if(open.includes(e.dataset.release)) e.open=true; });
+  }
+
+  // Switches the UI language and redraws the current view. The sidebar, the
+  // app header/tabs and the org team view are redrawn from memory; the open
+  // app tab is rebuilt, so its lazily loaded parts (live patches, expanded
+  // releases' patches, analytics, collaborators) are fetched again.
+  function setLang(next){
+    if(!LANGS.includes(next)) return;
+    lang=next;
+    try{ localStorage.setItem(LS.lang, lang); }catch(e){}
+    applyStaticI18n();
+    setStatus(lastStatus.cls, lastStatus.key, lastStatus.vars);
+    setConnError(lastConnError);
+    if($("app").hidden) return;
+    renderApps(); renderOrgs(); renderTeamOrgs();
+    if(state.selected){
+      if(state.appData && state.appData.appId===state.selected.app_id) redrawKeepingInput(mountAppShell);
+      // else: the app is still loading; selectApp draws it in the new language.
+    } else if(state.selectedOrg!=null){
+      if(state.teamView && state.teamView.orgId===state.selectedOrg) redrawKeepingInput(drawTeam);
+      // else: the team is still loading; selectOrg draws it in the new language.
+    } else renderOverview();
+  }
+  function toggleLang(){ setLang(lang==="ko"?"en":"ko"); }
 
   // ---------- init ----------
   function init(){
     applyTheme(localStorage.getItem(LS.theme)||"auto");
+    applyStaticI18n();
+    setStatus("","conn.notConnected");
     $("base").value=state.base;
     $("key").value=state.key;
     $("connectBtn").onclick=connect;
     $("themeBtn").onclick=toggleTheme;
     $("themeBtn2").onclick=toggleTheme;
+    $("langBtn").onclick=toggleLang;
+    $("langBtn2").onclick=toggleLang;
     $("disconnectBtn").onclick=disconnect;
     $("createAppBtn").onclick=createApp;
     // delegated copy for code blocks / snippets

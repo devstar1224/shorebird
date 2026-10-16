@@ -30,6 +30,13 @@ CDNs, no network dependencies, and no build step**.
   buttons (each behind a confirm dialog).
 - **Theme**: follows the OS light/dark preference, with a manual toggle
   (auto → light → dark).
+- **Language**: Korean by default, with an **English** / **Korean** toggle on
+  the connect screen and in the sidebar; the choice persists in
+  `localStorage`. Every UI string lives in the inline `I18N` dictionary
+  (`ko` and `en` must keep the same keys). Values the server owns — error
+  messages, app/org names, event types — are shown as sent, and role/status
+  names are translated for display only (request values stay as the API
+  expects them).
 
 ## Serving it
 
